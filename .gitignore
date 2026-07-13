@@ -1,0 +1,86 @@
+# ==========================================
+# 🍎 macOS & Sistema Operacional
+# ==========================================
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# ==========================================
+# 📱 Xcode, SwiftUI & iOS (Front-End)
+# ==========================================
+# Arquivos de Build e Cache
+build/
+DerivedData/
+*.moved-aside
+*.hmap
+*.ipa
+*.idiomvcdata
+
+# Arquivos de Usuário e Configurações Locais do Xcode
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata/
+*.xccheckout
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Swift Package Manager
+.build/
+Packages/
+Package.pins
+*.swiftpm/xcode/
+*.swiftpm/configuration/
+*.swiftdoc
+*.swiftmodule
+*.swiftsourceinfo
+
+# ==========================================
+# 🐹 Go & Gin Framework (Back-End)
+# ==========================================
+# Binários e Executáveis gerados pelo build ou 'go run'
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+routineplanner-api
+main
+
+# Arquivos de Workspace do Go
+*.work
+
+# Pasta de dependências locais (caso use go vendor no futuro)
+vendor/
+
+# ==========================================
+# 🔐 Segredos, Ambiente & Logs
+# ==========================================
+# Variáveis de ambiente (chaves do Strava, portas, etc.)
+.env
+.env.local
+.env.*
+*.env
+
+# Logs do Gin ou do sistema
+*.log
+
+# ==========================================
+# 💻 Editores (VS Code, Cursor, JetBrains)
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
