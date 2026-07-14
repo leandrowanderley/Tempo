@@ -12,7 +12,7 @@ import (
 // da integração (BACKEND_SPECS.md §5) para a equipe de iOS testar os dois
 // estados da tela de Perfil antes do OAuth2 real.
 func ToggleStrava(c *gin.Context) {
-	user, err := currentUser()
+	user, err := currentUser(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

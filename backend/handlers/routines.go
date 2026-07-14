@@ -11,7 +11,7 @@ import (
 )
 
 func ListRoutines(c *gin.Context) {
-	user, err := currentUser()
+	user, err := currentUser(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -38,7 +38,7 @@ func CreateRoutine(c *gin.Context) {
 		return
 	}
 
-	user, err := currentUser()
+	user, err := currentUser(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

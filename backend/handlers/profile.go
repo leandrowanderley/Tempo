@@ -7,7 +7,7 @@ import (
 )
 
 func GetProfile(c *gin.Context) {
-	user, err := currentUser()
+	user, err := currentUser(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

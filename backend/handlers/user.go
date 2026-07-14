@@ -6,15 +6,23 @@ import (
 	"tempo-api/database"
 	"tempo-api/models"
 
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-// currentUser retorna o único usuário do MVP, criando-o na primeira chamada.
-// TODO: substituir por autenticação real quando o fluxo de login for definido
-// (nenhum endpoint de auth está previsto no BACKEND_SPECS.md para este sprint).
-func currentUser() (*models.User, error) {
+// currentUser resolve o usuário autenticado a partir do "userID" injetado
+// por middleware.RequireAuth (claim "sub" do JWT do Supabase Auth) e cria a
+// linha correspondente em public.users no primeiro request autenticado,
+// usando o mesmo id do Supabase Auth como chave primária.
+func currentUser(c *gin.Context) (*models.User, error) {
+	id, err := uuid.Parse(c.GetString("userID"))
+	if err != nil {
+		return nil, err
+	}
+
 	var user models.User
-	err := database.DB.First(&user).Error
+	err = database.DB.First(&user, "id = ?", id).Error
 	if err == nil {
 		return &user, nil
 	}
@@ -23,8 +31,9 @@ func currentUser() (*models.User, error) {
 	}
 
 	user = models.User{
-		Name:  "Usuário Tempo",
-		Email: "usuario@tempo.app",
+		ID:    id,
+		Email: c.GetString("userEmail"),
+		Name:  "Novo Usuário",
 	}
 	if err := database.DB.Create(&user).Error; err != nil {
 		return nil, err

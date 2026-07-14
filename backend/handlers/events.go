@@ -15,7 +15,7 @@ import (
 // ListEvents lista os eventos/tarefas do usuário, com filtros opcionais
 // ?taskOnly=true e ?date=YYYY-MM-DD (BACKEND_SPECS.md §4.2).
 func ListEvents(c *gin.Context) {
-	user, err := currentUser()
+	user, err := currentUser(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -57,7 +57,7 @@ func CreateEvent(c *gin.Context) {
 		return
 	}
 
-	user, err := currentUser()
+	user, err := currentUser(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
