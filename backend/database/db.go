@@ -17,8 +17,13 @@ func ConnectDB() {
 	}
 
 	var err error
-	// Conecta de forma direta ao Supabase
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// PreferSimpleProtocol desabilita prepared statements: o Connection
+	// Pooler (PgBouncer) do Supabase reaproveita conexões entre clientes,
+	// então statements preparados em uma conexão colidem com os de outra.
+	DB, err = gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
 	if err != nil {
 		log.Fatal("❌ Falha ao conectar ao Supabase:", err)
 	}
