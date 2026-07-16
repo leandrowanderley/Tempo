@@ -9,30 +9,26 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
 
-    private let routines = HomeMockData.routines
     private let today = HomeMockData.today
     private let tomorrow = HomeMockData.tomorrow
     private let unscheduledTasks = HomeMockData.unscheduledTasks
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-                .padding(20)
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    WeeklyProgressWidgetView(
-                        routines: routines,
-                        motivationalMessage: "You're doing great!"
-                    )
-
-                    sectionList(title: "O Que Temos Hoje", events: today)
-                    sectionList(title: "Amanhã", events: tomorrow)
-                    sectionList(title: "Sem Data", events: unscheduledTasks)
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+                sectionList(title: "O Que Temos Hoje", events: today)
+                sectionList(title: "Amanhã", events: tomorrow)
+                sectionList(title: "Sem Data", events: unscheduledTasks)
             }
+            .padding(.horizontal, 20)
+            .padding(.top, ScrollEdgeFadeOverlay.height)
+            .padding(.bottom, Layout.tabBarClearance)
+        }
+        .overlay(alignment: .top) {
+            ScrollEdgeFadeOverlay()
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            header
         }
         .background(Color.tempoBackground.ignoresSafeArea())
     }
@@ -53,6 +49,8 @@ struct HomeView: View {
 
             TopActionsBarView()
         }
+        .padding(20)
+        .background(Color.tempoBackground)
     }
 
     @ViewBuilder

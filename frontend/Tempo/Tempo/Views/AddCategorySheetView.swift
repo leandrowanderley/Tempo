@@ -69,38 +69,15 @@ struct AddCategorySheetView: View {
     }
 
     private var header: some View {
-        HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.tempoTextPrimary)
-                    .frame(width: 32, height: 32)
-                    .background(Color.tempoCard)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.tempoBorder, lineWidth: 1))
-            }
-
-            Spacer()
-
-            Text("Nova Categoria")
-                .font(.headline)
-                .foregroundColor(.tempoTextPrimary)
-
-            Spacer()
-
-            Button {
+        SheetHeaderView(
+            title: "Nova Categoria",
+            isConfirmEnabled: isFormValid,
+            onCancel: { dismiss() },
+            onConfirm: {
                 onSave(name.trimmingCharacters(in: .whitespaces), Color(hex: selectedHex))
                 dismiss()
-            } label: {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 32, height: 32)
-                    .background(isFormValid ? Color.tempoPrimary : Color.tempoDisabled)
-                    .clipShape(Circle())
             }
-            .disabled(!isFormValid)
-        }
+        )
     }
 }
 

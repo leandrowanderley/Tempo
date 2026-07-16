@@ -8,12 +8,6 @@
 import Foundation
 
 enum HomeMockData {
-    static let routines: [Routine] = [
-        Routine(id: "r1", title: "Corrida", type: .workout, targetCount: 3, currentCount: 2),
-        Routine(id: "r2", title: "Superior", type: .workout, targetCount: 1, currentCount: 1),
-        Routine(id: "r3", title: "Meditação", type: .habit, targetCount: 5, currentCount: 2)
-    ]
-
     static let today: [Event] = [
         Event(
             id: "e1",

@@ -82,37 +82,12 @@ struct EventFormView: View {
     }
 
     private var header: some View {
-        HStack {
-            Button { dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.tempoTextPrimary)
-                    .frame(width: 32, height: 32)
-                    .background(Color.tempoCard)
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.tempoBorder, lineWidth: 1))
-            }
-
-            Spacer()
-
-            Text(existingEvent == nil ? (isTask ? "Nova Tarefa" : "Novo Evento") : "Editar")
-                .font(.headline)
-                .foregroundColor(.tempoTextPrimary)
-
-            Spacer()
-
-            Button {
-                save()
-            } label: {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(width: 32, height: 32)
-                    .background(isFormValid ? Color.tempoPrimary : Color.tempoDisabled)
-                    .clipShape(Circle())
-            }
-            .disabled(!isFormValid)
-        }
+        SheetHeaderView(
+            title: existingEvent == nil ? (isTask ? "Nova Tarefa" : "Novo Evento") : "Editar",
+            isConfirmEnabled: isFormValid,
+            onCancel: { dismiss() },
+            onConfirm: { save() }
+        )
     }
 
     private var notesField: some View {

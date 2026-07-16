@@ -8,14 +8,17 @@ import SwiftUI
 // TODO: Implementar grid mensal + linha do tempo semanal (project.md §3.3). Layout placeholder por enquanto.
 struct CalendarView: View {
     var body: some View {
-        VStack(spacing: 0) {
+        ScrollView {
+            placeholder
+                .padding(.horizontal, 20)
+                .padding(.top, ScrollEdgeFadeOverlay.height)
+                .padding(.bottom, Layout.tabBarClearance)
+        }
+        .overlay(alignment: .top) {
+            ScrollEdgeFadeOverlay()
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
             header
-                .padding(20)
-
-            ScrollView {
-                placeholder
-                    .padding(.horizontal, 20)
-            }
         }
         .background(Color.tempoBackground.ignoresSafeArea())
     }
@@ -30,6 +33,8 @@ struct CalendarView: View {
 
             TopActionsBarView()
         }
+        .padding(20)
+        .background(Color.tempoBackground)
     }
 
     private var placeholder: some View {
