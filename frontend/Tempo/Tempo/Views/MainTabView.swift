@@ -26,7 +26,6 @@ struct MainTabView: View {
                 }
         }
         .tint(.tempoPrimary)
-        .tabViewStyle(.sidebarAdaptable)
     }
 }
 

@@ -5,42 +5,82 @@
 
 import SwiftUI
 
-private enum CalendarViewMode: String, CaseIterable {
+private enum CalendarViewMode {
     case grid
     case timeline
 }
 
-// TODO: Implementar grid mensal + linha do tempo semanal (project.md §3.3). Conteúdo de cada visão ainda é placeholder.
+// TODO: Implementar grid mensal (project.md §3.3). Timeline semanal já funcional; grid ainda é placeholder.
 struct CalendarView: View {
-    @State private var viewMode: CalendarViewMode = .grid
+    @State private var viewMode: CalendarViewMode = .timeline
+    @State private var isShowingFilters = false
+    @State private var filters = CalendarFilters.makeDefault()
+    @State private var dates = CalendarMockData.dateRange()
+
+    private var timelineItems: [CalendarTimelineItem] {
+        var allItems = CalendarMockData.events(for: dates)
+
+        if filters.showRoutines {
+            allItems += CalendarMockData.routineItems(for: dates)
+        }
+        if filters.showFixedCommitments {
+            allItems += CalendarMockData.fixedCommitmentItems(for: dates)
+        }
+
+        return allItems.filter { item in
+            (!item.isTask || filters.showTasks) && filters.selectedCategories.contains(item.category)
+        }
+    }
 
     var body: some View {
-        ScrollView {
-            content
-                .padding(.horizontal, 20)
-                .padding(.top, ScrollEdgeFadeOverlay.height)
-                .padding(.bottom, Layout.tabBarClearance)
-        }
-        .overlay(alignment: .top) {
-            ScrollEdgeFadeOverlay()
+        Group {
+            switch viewMode {
+            case .grid:
+                ScrollView {
+                    placeholder(
+                        icon: "calendar",
+                        title: "Visão mensal em construção",
+                        message: "Em breve: grade do mês com a agenda do dia selecionado."
+                    )
+                    .padding(.horizontal, 20)
+                    .padding(.top, ScrollEdgeFadeOverlay.height)
+                    .padding(.bottom, Layout.tabBarClearance)
+                }
+                .overlay(alignment: .top) {
+                    ScrollEdgeFadeOverlay()
+                }
+            case .timeline:
+                // Sem ScrollEdgeFadeOverlay aqui: a linha de dias da timeline já fica fixa
+                // no topo (não desliza por baixo do header), então o fade não se aplica.
+                WeekTimelineView(dates: dates, items: timelineItems)
+            }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
             header
         }
         .background(Color.tempoBackground.ignoresSafeArea())
+        .sheet(isPresented: $isShowingFilters) {
+            CalendarFilterView(filters: $filters)
+        }
     }
 
     private var header: some View {
-        HStack(alignment: .center, spacing: 12) {
-            viewModeToggle
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .center) {
+                viewModeToggle
+                Spacer()
+                TopActionsBarView()
+            }
 
-            Text("Calendário")
-                .font(.title2.weight(.bold))
-                .foregroundColor(.tempoTextPrimary)
+            HStack(alignment: .center) {
+                Text(periodLabel)
+                    .font(.title2.weight(.bold))
+                    .foregroundColor(.tempoTextPrimary)
 
-            Spacer()
+                Spacer()
 
-            TopActionsBarView()
+                filterButton
+            }
         }
         .padding(20)
         .background(Color.tempoBackground)
@@ -65,22 +105,28 @@ struct CalendarView: View {
         }
     }
 
-    @ViewBuilder
-    private var content: some View {
-        switch viewMode {
-        case .grid:
-            placeholder(
-                icon: "calendar",
-                title: "Visão mensal em construção",
-                message: "Em breve: grade do mês com a agenda do dia selecionado."
-            )
-        case .timeline:
-            placeholder(
-                icon: "clock",
-                title: "Linha do tempo em construção",
-                message: "Em breve: colunas por dia com os horários de 01h às 24h."
-            )
+    private var filterButton: some View {
+        Button {
+            isShowingFilters = true
+        } label: {
+            Image(systemName: "line.3.horizontal")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.tempoTextPrimary)
+                .frame(width: 36, height: 36)
+                .background(Color.tempoCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.tempoBorder, lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 10))
         }
+    }
+
+    private var periodLabel: String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "LLLL"
+        return formatter.string(from: Date()).capitalized
     }
 
     private func placeholder(icon: String, title: String, message: String) -> some View {
