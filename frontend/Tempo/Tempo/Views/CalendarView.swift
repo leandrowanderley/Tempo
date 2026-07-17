@@ -5,11 +5,18 @@
 
 import SwiftUI
 
-// TODO: Implementar grid mensal + linha do tempo semanal (project.md §3.3). Layout placeholder por enquanto.
+private enum CalendarViewMode: String, CaseIterable {
+    case grid
+    case timeline
+}
+
+// TODO: Implementar grid mensal + linha do tempo semanal (project.md §3.3). Conteúdo de cada visão ainda é placeholder.
 struct CalendarView: View {
+    @State private var viewMode: CalendarViewMode = .grid
+
     var body: some View {
         ScrollView {
-            placeholder
+            content
                 .padding(.horizontal, 20)
                 .padding(.top, ScrollEdgeFadeOverlay.height)
                 .padding(.bottom, Layout.tabBarClearance)
@@ -24,7 +31,9 @@ struct CalendarView: View {
     }
 
     private var header: some View {
-        HStack(alignment: .top) {
+        HStack(alignment: .center, spacing: 12) {
+            viewModeToggle
+
             Text("Calendário")
                 .font(.title2.weight(.bold))
                 .foregroundColor(.tempoTextPrimary)
@@ -37,17 +46,54 @@ struct CalendarView: View {
         .background(Color.tempoBackground)
     }
 
-    private var placeholder: some View {
+    private var viewModeToggle: some View {
+        Button {
+            withAnimation(.easeInOut) {
+                viewMode = viewMode == .grid ? .timeline : .grid
+            }
+        } label: {
+            Image(systemName: viewMode == .grid ? "rectangle.grid.3x2" : "rectangle.grid.1x2")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(.tempoTextPrimary)
+                .frame(width: 36, height: 36)
+                .background(Color.tempoCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(Color.tempoBorder, lineWidth: 1)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch viewMode {
+        case .grid:
+            placeholder(
+                icon: "calendar",
+                title: "Visão mensal em construção",
+                message: "Em breve: grade do mês com a agenda do dia selecionado."
+            )
+        case .timeline:
+            placeholder(
+                icon: "clock",
+                title: "Linha do tempo em construção",
+                message: "Em breve: colunas por dia com os horários de 01h às 24h."
+            )
+        }
+    }
+
+    private func placeholder(icon: String, title: String, message: String) -> some View {
         VStack(spacing: 12) {
-            Image(systemName: "calendar")
+            Image(systemName: icon)
                 .font(.system(size: 40))
                 .foregroundColor(.tempoTextSecondary)
 
-            Text("Calendário em construção")
+            Text(title)
                 .font(.headline)
                 .foregroundColor(.tempoTextPrimary)
 
-            Text("Em breve: visão mensal em grade e linha do tempo semanal dos seus compromissos.")
+            Text(message)
                 .font(.subheadline)
                 .foregroundColor(.tempoTextSecondary)
                 .multilineTextAlignment(.center)
