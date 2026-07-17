@@ -12,10 +12,16 @@ struct HomeView: View {
     private let today = HomeMockData.today
     private let tomorrow = HomeMockData.tomorrow
     private let unscheduledTasks = HomeMockData.unscheduledTasks
+    private let routines = RoutineMockData.workouts + RoutineMockData.habits
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
+                WeeklyProgressWidgetView(
+                    routines: routines,
+                    motivationalMessage: "You're doing great!"
+                )
+
                 sectionList(title: "O Que Temos Hoje", events: today)
                 sectionList(title: "Amanhã", events: tomorrow)
                 sectionList(title: "Sem Data", events: unscheduledTasks)

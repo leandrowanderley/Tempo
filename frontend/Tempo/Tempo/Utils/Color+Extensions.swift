@@ -10,7 +10,8 @@ extension Color {
     static let tempoDisabled = Color(hex: "#D1D1D6")
     static let tempoDestructive = Color(hex: "#FF3B30")
 
-    static let tempoBackground = Color(uiColor: .systemBackground)
+//    static let tempoBackground = Color(uiColor: .systemBackground)
+    static let tempoBackground = Color(hex: "#F2F2F7")
     static let tempoCard = Color(hex: "#FFFFFF")
     static let tempoBorder = Color(hex: "#E5E5EA")
     static let tempoTextPrimary = Color(uiColor: .label)

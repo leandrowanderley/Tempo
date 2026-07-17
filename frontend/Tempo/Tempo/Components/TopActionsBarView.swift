@@ -7,7 +7,7 @@ import SwiftUI
 
 struct TopActionsBarView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
-    @State private var showAccountActions = false
+    @State private var isShowingProfile = false
     @State private var isShowingEventForm = false
 
     // TODO: Ligar onSearch quando a Central de Busca existir (project.md §3.6).
@@ -17,7 +17,11 @@ struct TopActionsBarView: View {
         HStack(spacing: 18) {
             actionButton(systemName: "plus") { isShowingEventForm = true }
             actionButton(systemName: "magnifyingglass", action: onSearch)
-            actionButton(systemName: "person.circle") { showAccountActions = true }
+            Button {
+                isShowingProfile = true
+            } label: {
+                profileIcon
+            }
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
@@ -26,11 +30,8 @@ struct TopActionsBarView: View {
         .overlay(
             Capsule().stroke(Color.tempoBorder, lineWidth: 1)
         )
-        .confirmationDialog("Conta", isPresented: $showAccountActions, titleVisibility: .visible) {
-            Button("Sair da conta", role: .destructive) {
-                Task { await authViewModel.logout() }
-            }
-            Button("Cancelar", role: .cancel) {}
+        .sheet(isPresented: $isShowingProfile) {
+            ProfileView()
         }
         .sheet(isPresented: $isShowingEventForm) {
             EventFormView()
@@ -40,6 +41,21 @@ struct TopActionsBarView: View {
     private func actionButton(systemName: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(.tempoPrimary)
+        }
+    }
+
+    @ViewBuilder
+    private var profileIcon: some View {
+        if let icon = authViewModel.currentUserIcon {
+            Image(icon)
+                .resizable()
+                .aspectRatio(1, contentMode: .fill)
+                .frame(width: 24, height: 24)
+                .clipShape(Circle())
+        } else {
+            Image(systemName: "person.circle")
                 .font(.system(size: 17, weight: .medium))
                 .foregroundColor(.tempoPrimary)
         }

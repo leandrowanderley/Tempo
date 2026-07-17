@@ -14,20 +14,23 @@ struct RoutinePlannerView: View {
 
     @State private var isAddingWorkout = false
     @State private var isAddingHabit = false
+    @State private var isAddingCommitment = false
 
-    private let fixedCommitments = RoutineMockData.fixedCommitments
+    @State private var fixedCommitments = RoutineMockData.fixedCommitments
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
                 routineSection(
                     title: "Metas de Exercícios Físicos",
+                    type: .workout,
                     routines: $workouts,
                     onAdd: { isAddingWorkout = true }
                 )
 
                 routineSection(
                     title: "Hábitos Personalizados",
+                    type: .habit,
                     routines: $habits,
                     onAdd: { isAddingHabit = true }
                 )
@@ -46,13 +49,18 @@ struct RoutinePlannerView: View {
         }
         .background(Color.tempoBackground.ignoresSafeArea())
         .sheet(isPresented: $isAddingWorkout) {
-            AddRoutineSheetView(title: "Novo Treino") { name in
-                workouts.append(Routine(id: UUID().uuidString, title: name, type: .workout, targetCount: 1, currentCount: 0))
+            RoutineFormView(type: .workout) { routine in
+                workouts.append(routine)
             }
         }
         .sheet(isPresented: $isAddingHabit) {
-            AddRoutineSheetView(title: "Novo Hábito") { name in
-                habits.append(Routine(id: UUID().uuidString, title: name, type: .habit, targetCount: 1, currentCount: 0))
+            RoutineFormView(type: .habit) { routine in
+                habits.append(routine)
+            }
+        }
+        .sheet(isPresented: $isAddingCommitment) {
+            FixedCommitmentFormView { commitment in
+                fixedCommitments.append(commitment)
             }
         }
     }
@@ -71,7 +79,7 @@ struct RoutinePlannerView: View {
         .background(Color.tempoBackground)
     }
 
-    private func routineSection(title: String, routines: Binding<[Routine]>, onAdd: @escaping () -> Void) -> some View {
+    private func routineSection(title: String, type: RoutineType, routines: Binding<[Routine]>, onAdd: @escaping () -> Void) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(title)
@@ -88,8 +96,18 @@ struct RoutinePlannerView: View {
             }
 
             VStack(spacing: 10) {
-                ForEach(routines) { $routine in
-                    RoutineGoalRowView(routine: $routine)
+                ForEach(routines.wrappedValue) { routine in
+                    RoutineRowView(
+                        routine: routine,
+                        onSave: { updated in
+                            if let index = routines.wrappedValue.firstIndex(where: { $0.id == updated.id }) {
+                                routines.wrappedValue[index] = updated
+                            }
+                        },
+                        onDelete: {
+                            routines.wrappedValue.removeAll { $0.id == routine.id }
+                        }
+                    )
                 }
             }
         }
@@ -97,41 +115,38 @@ struct RoutinePlannerView: View {
 
     private var fixedCommitmentsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Compromissos Fixos")
-                .font(.headline)
-                .foregroundColor(.tempoTextPrimary)
+            HStack {
+                Text("Compromissos Fixos")
+                    .font(.headline)
+                    .foregroundColor(.tempoTextPrimary)
 
-            // TODO: Back-end ainda não tem campo de recorrência (ver frontend/TODO.MD) — lista só leitura por enquanto.
+                Spacer()
+
+                Button {
+                    isAddingCommitment = true
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundColor(.tempoPrimary)
+                }
+            }
+
             VStack(spacing: 10) {
                 ForEach(fixedCommitments) { commitment in
-                    fixedCommitmentRow(commitment)
+                    FixedCommitmentRowView(
+                        commitment: commitment,
+                        onSave: { updated in
+                            if let index = fixedCommitments.firstIndex(where: { $0.id == updated.id }) {
+                                fixedCommitments[index] = updated
+                            }
+                        },
+                        onDelete: {
+                            fixedCommitments.removeAll { $0.id == commitment.id }
+                        }
+                    )
                 }
             }
         }
-    }
-
-    private func fixedCommitmentRow(_ commitment: FixedCommitment) -> some View {
-        HStack(spacing: 12) {
-            CategoryDotView(category: commitment.category)
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(commitment.title)
-                    .font(.body)
-                    .foregroundColor(.tempoTextPrimary)
-
-                Text(commitment.schedule)
-                    .font(.caption)
-                    .foregroundColor(.tempoTextSecondary)
-            }
-
-            Spacer()
-        }
-        .padding()
-        .background(Color.tempoCard)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12).stroke(Color.tempoBorder, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }
 
