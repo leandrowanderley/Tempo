@@ -21,12 +21,18 @@ import SwiftUI
 struct WeekTimelineView: View {
     let dates: [Date]
     let items: [CalendarTimelineItem]
+    @Binding var visibleMonthDate: Date
 
     private let hourHeight: CGFloat = 60
     private let hourGutterWidth: CGFloat = 40
     private let dayColumnWidth: CGFloat = 130
 
     @State private var itemsByDay: [Date: [CalendarTimelineItem]] = [:]
+
+    // Chave (ano*12+mês) do último mês reportado pro cabeçalho, pra só escrever em
+    // `visibleMonthDate` (e disparar re-render do header em CalendarView) quando o mês
+    // realmente muda — não a cada pixel de arraste.
+    @State private var lastReportedMonthKey: Int?
 
     private var currentHour: Int {
         Calendar.current.component(.hour, from: Date())
@@ -56,6 +62,11 @@ struct WeekTimelineView: View {
                 }
             }
             .contentMargins(.top, 0, for: .scrollContent)
+            .onScrollGeometryChange(for: CGFloat.self) { geometry in
+                geometry.contentOffset.x
+            } action: { _, newValue in
+                updateVisibleMonth(forOffsetX: newValue)
+            }
         }
         .task(id: items) {
             itemsByDay = Dictionary(grouping: items) { Calendar.current.startOfDay(for: $0.startDate) }
@@ -214,6 +225,29 @@ struct WeekTimelineView: View {
         }
     }
 
+    /// Deduz qual dia está na borda esquerda da timeline a partir do offset horizontal de
+    /// scroll (as semanas têm largura fixa: gutter de horas + 7 colunas de dia) e, se o mês
+    /// desse dia mudou desde a última leitura, atualiza o binding pro cabeçalho refletir.
+    private func updateVisibleMonth(forOffsetX offsetX: CGFloat) {
+        guard !dates.isEmpty else { return }
+
+        let weekBlockWidth = hourGutterWidth + dayColumnWidth * 7
+        let clampedOffset = max(offsetX, 0)
+        let weekIndex = Int(clampedOffset / weekBlockWidth)
+        let remainder = clampedOffset - CGFloat(weekIndex) * weekBlockWidth
+        let dayIndexInWeek = remainder <= hourGutterWidth
+            ? 0
+            : min(Int((remainder - hourGutterWidth) / dayColumnWidth), 6)
+        let dayIndex = min(weekIndex * 7 + dayIndexInWeek, dates.count - 1)
+        let date = dates[dayIndex]
+
+        let calendar = Calendar.current
+        let monthKey = calendar.component(.year, from: date) * 12 + calendar.component(.month, from: date)
+        guard monthKey != lastReportedMonthKey else { return }
+        lastReportedMonthKey = monthKey
+        visibleMonthDate = date
+    }
+
     private func timeOffset(_ date: Date) -> CGFloat {
         let components = Calendar.current.dateComponents([.hour, .minute], from: date)
         let hour = CGFloat(components.hour ?? 0)
@@ -252,7 +286,8 @@ struct WeekTimelineView: View {
         dates: dates,
         items: CalendarMockData.events(for: dates)
             + CalendarMockData.routineItems(for: dates)
-            + CalendarMockData.fixedCommitmentItems(for: dates)
+            + CalendarMockData.fixedCommitmentItems(for: dates),
+        visibleMonthDate: .constant(Date())
     )
     .background(Color.tempoBackground)
 }

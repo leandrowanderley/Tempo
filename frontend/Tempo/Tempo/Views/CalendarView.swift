@@ -26,6 +26,11 @@ struct CalendarView: View {
     @State private var timelineItems: [CalendarTimelineItem] = []
     @State private var needsTimelineRefresh = true
 
+    // Mês exibido no cabeçalho: acompanha o dia que está na borda da timeline enquanto o
+    // usuário rola horizontalmente (ver WeekTimelineView.updateVisibleMonth). Começa em
+    // hoje, que é pra onde a timeline rola no primeiro load.
+    @State private var visibleMonthDate = Date()
+
     private static let periodLabelFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "pt_BR")
@@ -34,7 +39,12 @@ struct CalendarView: View {
     }()
 
     var body: some View {
-        CalendarContentView(viewMode: viewMode, dates: dates, timelineItems: timelineItems)
+        CalendarContentView(
+            viewMode: viewMode,
+            dates: dates,
+            timelineItems: timelineItems,
+            visibleMonthDate: $visibleMonthDate
+        )
             .safeAreaInset(edge: .top, spacing: 0) {
                 header
             }
@@ -85,7 +95,7 @@ struct CalendarView: View {
             HStack(alignment: .center) {
                 Text(periodLabel)
                     .font(.title2.weight(.bold))
-                    .foregroundColor(.tempoTextPrimary)
+                    .foregroundColor(isViewingCurrentMonth ? .tempoPrimary : .tempoTextPrimary)
 
                 Spacer()
 
@@ -133,7 +143,11 @@ struct CalendarView: View {
     }
 
     private var periodLabel: String {
-        Self.periodLabelFormatter.string(from: Date()).capitalized
+        Self.periodLabelFormatter.string(from: visibleMonthDate).capitalized
+    }
+
+    private var isViewingCurrentMonth: Bool {
+        Calendar.current.isDate(visibleMonthDate, equalTo: Date(), toGranularity: .month)
     }
 }
 
@@ -152,6 +166,7 @@ private struct CalendarContentView: View {
     let viewMode: CalendarViewMode
     let dates: [Date]
     let timelineItems: [CalendarTimelineItem]
+    @Binding var visibleMonthDate: Date
 
     var body: some View {
         ZStack {
@@ -174,7 +189,7 @@ private struct CalendarContentView: View {
 
             // Sem ScrollEdgeFadeOverlay aqui: a linha de dias da timeline já fica fixa
             // no topo (não desliza por baixo do header), então o fade não se aplica.
-            WeekTimelineView(dates: dates, items: timelineItems)
+            WeekTimelineView(dates: dates, items: timelineItems, visibleMonthDate: $visibleMonthDate)
                 .opacity(viewMode == .timeline ? 1 : 0)
                 .allowsHitTesting(viewMode == .timeline)
                 .accessibilityHidden(viewMode != .timeline)
