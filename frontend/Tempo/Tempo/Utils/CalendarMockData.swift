@@ -11,12 +11,17 @@
 import Foundation
 
 enum CalendarMockData {
-    /// Range de dias "praticamente infinito" pra timeline: N semanas antes e depois da
-    /// semana atual, alinhado ao início da semana. Carregado de forma lazy pela view.
+    // TODO: hoje o range inteiro é gerado e desenhado de uma vez no primeiro load da
+    // timeline (ver WeekTimelineView.scrollToNow, que força o layout de todas as colunas
+    // até "hoje" pra poder rolar até lá). weeksBefore/weeksAfter ficam pequenos de
+    // propósito por causa disso — aumentar exige paginação sob demanda (carregar mais
+    // semanas ao aproximar do fim do range visível) em vez de gerar tudo de uma vez.
+    /// Range de dias pra timeline: N semanas antes e depois da semana atual, alinhado ao
+    /// início da semana.
     static func dateRange(
         around referenceDate: Date = Date(),
-        weeksBefore: Int = 12,
-        weeksAfter: Int = 12,
+        weeksBefore: Int = 4,
+        weeksAfter: Int = 4,
         calendar: Calendar = .current
     ) -> [Date] {
         guard let currentWeek = calendar.dateInterval(of: .weekOfYear, for: referenceDate) else { return [] }

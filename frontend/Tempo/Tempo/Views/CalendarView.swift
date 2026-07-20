@@ -141,14 +141,20 @@ struct CalendarView: View {
 // subtree. Quando o `switch` ficava direto no body do `CalendarView` (conteúdo
 // raiz da aba no TabView), a mudança de identidade do subtree fazia o
 // UITabBarController resetar a seleção pra primeira aba (Home) por um frame.
+//
+// As duas variantes ficam sempre montadas (alternando só opacidade/hit-testing) em vez
+// de um `switch` que troca a identidade da view: a `WeekTimelineView` guarda estado
+// pesado (`itemsByDay`, posição de scroll) que, se recriado a cada toggle, força
+// reagrupar ~4 mil itens e re-executar o scroll-to-hoje (que por sua vez obriga a
+// LazyHStack a desenhar todas as colunas entre o início do range e hoje) toda vez que o
+// usuário volta pra essa visão — daí o delay perceptível no toggle.
 private struct CalendarContentView: View {
     let viewMode: CalendarViewMode
     let dates: [Date]
     let timelineItems: [CalendarTimelineItem]
 
     var body: some View {
-        switch viewMode {
-        case .grid:
+        ZStack {
             ScrollView {
                 placeholder(
                     icon: "calendar",
@@ -162,10 +168,16 @@ private struct CalendarContentView: View {
             .overlay(alignment: .top) {
                 ScrollEdgeFadeOverlay()
             }
-        case .timeline:
+            .opacity(viewMode == .grid ? 1 : 0)
+            .allowsHitTesting(viewMode == .grid)
+            .accessibilityHidden(viewMode != .grid)
+
             // Sem ScrollEdgeFadeOverlay aqui: a linha de dias da timeline já fica fixa
             // no topo (não desliza por baixo do header), então o fade não se aplica.
             WeekTimelineView(dates: dates, items: timelineItems)
+                .opacity(viewMode == .timeline ? 1 : 0)
+                .allowsHitTesting(viewMode == .timeline)
+                .accessibilityHidden(viewMode != .timeline)
         }
     }
 
