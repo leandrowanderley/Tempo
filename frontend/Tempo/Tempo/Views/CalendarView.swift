@@ -33,35 +33,14 @@ struct CalendarView: View {
     }
 
     var body: some View {
-        Group {
-            switch viewMode {
-            case .grid:
-                ScrollView {
-                    placeholder(
-                        icon: "calendar",
-                        title: "Visão mensal em construção",
-                        message: "Em breve: grade do mês com a agenda do dia selecionado."
-                    )
-                    .padding(.horizontal, 20)
-                    .padding(.top, ScrollEdgeFadeOverlay.height)
-                    .padding(.bottom, Layout.tabBarClearance)
-                }
-                .overlay(alignment: .top) {
-                    ScrollEdgeFadeOverlay()
-                }
-            case .timeline:
-                // Sem ScrollEdgeFadeOverlay aqui: a linha de dias da timeline já fica fixa
-                // no topo (não desliza por baixo do header), então o fade não se aplica.
-                WeekTimelineView(dates: dates, items: timelineItems)
+        CalendarContentView(viewMode: viewMode, dates: dates, timelineItems: timelineItems)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                header
             }
-        }
-        .safeAreaInset(edge: .top, spacing: 0) {
-            header
-        }
-        .background(Color.tempoBackground.ignoresSafeArea())
-        .sheet(isPresented: $isShowingFilters) {
-            CalendarFilterView(filters: $filters)
-        }
+            .background(Color.tempoBackground.ignoresSafeArea())
+            .sheet(isPresented: $isShowingFilters) {
+                CalendarFilterView(filters: $filters)
+            }
     }
 
     private var header: some View {
@@ -127,6 +106,39 @@ struct CalendarView: View {
         formatter.locale = Locale(identifier: "pt_BR")
         formatter.dateFormat = "LLLL"
         return formatter.string(from: Date()).capitalized
+    }
+}
+
+// Isolado num View próprio para que a troca de `viewMode` reconstrua só este
+// subtree. Quando o `switch` ficava direto no body do `CalendarView` (conteúdo
+// raiz da aba no TabView), a mudança de identidade do subtree fazia o
+// UITabBarController resetar a seleção pra primeira aba (Home) por um frame.
+private struct CalendarContentView: View {
+    let viewMode: CalendarViewMode
+    let dates: [Date]
+    let timelineItems: [CalendarTimelineItem]
+
+    var body: some View {
+        switch viewMode {
+        case .grid:
+            ScrollView {
+                placeholder(
+                    icon: "calendar",
+                    title: "Visão mensal em construção",
+                    message: "Em breve: grade do mês com a agenda do dia selecionado."
+                )
+                .padding(.horizontal, 20)
+                .padding(.top, ScrollEdgeFadeOverlay.height)
+                .padding(.bottom, Layout.tabBarClearance)
+            }
+            .overlay(alignment: .top) {
+                ScrollEdgeFadeOverlay()
+            }
+        case .timeline:
+            // Sem ScrollEdgeFadeOverlay aqui: a linha de dias da timeline já fica fixa
+            // no topo (não desliza por baixo do header), então o fade não se aplica.
+            WeekTimelineView(dates: dates, items: timelineItems)
+        }
     }
 
     private func placeholder(icon: String, title: String, message: String) -> some View {
