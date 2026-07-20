@@ -21,12 +21,15 @@ struct FixedCommitment: Codable, Identifiable {
 }
 
 extension FixedCommitment {
-    var scheduleLabel: String {
-        let daysLabel = Weekday.joinedLabel(weekdays)
-
+    private static let timeFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
-        let timeLabel = "\(formatter.string(from: startTime)) - \(formatter.string(from: endTime))"
+        return formatter
+    }()
+
+    var scheduleLabel: String {
+        let daysLabel = Weekday.joinedLabel(weekdays)
+        let timeLabel = "\(Self.timeFormatter.string(from: startTime)) - \(Self.timeFormatter.string(from: endTime))"
 
         return daysLabel.isEmpty ? timeLabel : "\(daysLabel), \(timeLabel)"
     }

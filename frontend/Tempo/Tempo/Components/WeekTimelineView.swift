@@ -226,10 +226,14 @@ struct WeekTimelineView: View {
         return Weekday(rawValue: weekdayNumber)?.shortLabel ?? ""
     }
 
-    private func dayNumber(_ date: Date) -> String {
+    private static let dayNumberFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "d"
-        return formatter.string(from: date)
+        return formatter
+    }()
+
+    private func dayNumber(_ date: Date) -> String {
+        Self.dayNumberFormatter.string(from: date)
     }
 
     private func hourLabel(_ hour: Int) -> String {

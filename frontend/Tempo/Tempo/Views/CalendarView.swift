@@ -17,20 +17,21 @@ struct CalendarView: View {
     @State private var filters = CalendarFilters.makeDefault()
     @State private var dates = CalendarMockData.dateRange()
 
-    private var timelineItems: [CalendarTimelineItem] {
-        var allItems = CalendarMockData.events(for: dates)
+    // Cache de `timelineItems`: a versão anterior era um `var` computado que refazia o
+    // pipeline inteiro (~12 mil chamadas de Calendar) a cada reavaliação do `body` — inclusive
+    // durante o `withAnimation` do toggle de view mode, que reavalia o body a cada frame da
+    // animação, e mesmo quando `viewMode == .grid` (onde o valor nem é usado). Agora só
+    // recalcula quando `filters`/`dates` de fato mudam, e adia o recálculo se a timeline não
+    // estiver visível no momento da mudança.
+    @State private var timelineItems: [CalendarTimelineItem] = []
+    @State private var needsTimelineRefresh = true
 
-        if filters.showRoutines {
-            allItems += CalendarMockData.routineItems(for: dates)
-        }
-        if filters.showFixedCommitments {
-            allItems += CalendarMockData.fixedCommitmentItems(for: dates)
-        }
-
-        return allItems.filter { item in
-            (!item.isTask || filters.showTasks) && filters.selectedCategories.contains(item.category)
-        }
-    }
+    private static let periodLabelFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "pt_BR")
+        formatter.dateFormat = "LLLL"
+        return formatter
+    }()
 
     var body: some View {
         CalendarContentView(viewMode: viewMode, dates: dates, timelineItems: timelineItems)
@@ -41,6 +42,36 @@ struct CalendarView: View {
             .sheet(isPresented: $isShowingFilters) {
                 CalendarFilterView(filters: $filters)
             }
+            .onAppear(perform: refreshTimelineItemsIfNeeded)
+            .onChange(of: viewMode) { _, newValue in
+                if newValue == .timeline {
+                    refreshTimelineItemsIfNeeded()
+                }
+            }
+            .onChange(of: filters) { _, _ in
+                needsTimelineRefresh = true
+                if viewMode == .timeline {
+                    refreshTimelineItemsIfNeeded()
+                }
+            }
+    }
+
+    private func refreshTimelineItemsIfNeeded() {
+        guard needsTimelineRefresh else { return }
+
+        var allItems = CalendarMockData.events(for: dates)
+
+        if filters.showRoutines {
+            allItems += CalendarMockData.routineItems(for: dates)
+        }
+        if filters.showFixedCommitments {
+            allItems += CalendarMockData.fixedCommitmentItems(for: dates)
+        }
+
+        timelineItems = allItems.filter { item in
+            (!item.isTask || filters.showTasks) && filters.selectedCategories.contains(item.category)
+        }
+        needsTimelineRefresh = false
     }
 
     private var header: some View {
@@ -102,10 +133,7 @@ struct CalendarView: View {
     }
 
     private var periodLabel: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "pt_BR")
-        formatter.dateFormat = "LLLL"
-        return formatter.string(from: Date()).capitalized
+        Self.periodLabelFormatter.string(from: Date()).capitalized
     }
 }
 
