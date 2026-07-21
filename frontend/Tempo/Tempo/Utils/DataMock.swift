@@ -10,27 +10,46 @@
 import Foundation
 
 enum DataMock {
+    /// Busca eventos exatamente no intervalo `[startDate, endDate]` (ambos inclusivos, por dia).
+    /// É a função a ser usada por qualquer view (mensal, semanal, etc.) — pede só os dias que
+    /// de fato serão exibidos, no mesmo formato de range que a API real vai receber
+    /// (equivalente a um futuro `GET /api/v1/events?from=&to=`).
     static func events(
-        around referenceDate: Date = Date(),
-        monthsBefore: Int = 2,
-        monthsAfter: Int = 2,
+        from startDate: Date,
+        to endDate: Date,
         calendar: Calendar = .current
     ) -> [Event] {
-        let dates = dateRange(around: referenceDate, monthsBefore: monthsBefore, monthsAfter: monthsAfter, calendar: calendar)
+        let dates = dateRange(from: startDate, to: endDate, calendar: calendar)
 
         return oneOffEvents(for: dates, calendar: calendar)
             + routineEvents(for: dates, calendar: calendar)
             + fixedCommitmentEvents(for: dates, calendar: calendar)
     }
 
-    private static func dateRange(around referenceDate: Date, monthsBefore: Int, monthsAfter: Int, calendar: Calendar) -> [Date] {
+    /// Conveniência sobre `events(from:to:)` para quando o chamador pensa em "meses ao redor
+    /// de uma data" em vez de um range explícito de dias.
+    static func events(
+        around referenceDate: Date = Date(),
+        monthsBefore: Int = 2,
+        monthsAfter: Int = 2,
+        calendar: Calendar = .current
+    ) -> [Event] {
         guard let monthInterval = calendar.dateInterval(of: .month, for: referenceDate),
               let start = calendar.date(byAdding: .month, value: -monthsBefore, to: monthInterval.start),
-              let end = calendar.date(byAdding: .month, value: monthsAfter + 1, to: monthInterval.start) else { return [] }
+              let endExclusive = calendar.date(byAdding: .month, value: monthsAfter + 1, to: monthInterval.start),
+              let end = calendar.date(byAdding: .day, value: -1, to: endExclusive) else { return [] }
+
+        return events(from: start, to: end, calendar: calendar)
+    }
+
+    private static func dateRange(from startDate: Date, to endDate: Date, calendar: Calendar) -> [Date] {
+        let start = calendar.startOfDay(for: startDate)
+        let end = calendar.startOfDay(for: endDate)
+        guard start <= end else { return [] }
 
         var dates: [Date] = []
         var current = start
-        while current < end {
+        while current <= end {
             dates.append(current)
             guard let next = calendar.date(byAdding: .day, value: 1, to: current) else { break }
             current = next

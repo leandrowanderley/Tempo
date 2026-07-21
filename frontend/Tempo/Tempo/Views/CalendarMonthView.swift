@@ -95,7 +95,7 @@ struct CalendarMonthView: View {
 
     private var weekdayHeader: some View {
         HStack {
-            ForEach(weekdaySymbols, id: \.self) { symbol in
+            ForEach(Array(weekdaySymbols.enumerated()), id: \.offset) { _, symbol in
                 Text(symbol)
                     .font(.caption.weight(.semibold))
                     .foregroundColor(.tempoTextSecondary)
@@ -223,7 +223,9 @@ struct CalendarMonthView: View {
     }
 
     private func loadEvents() {
-        allEvents = DataMock.events(around: displayedMonth, monthsBefore: 0, monthsAfter: 0, calendar: calendar)
+        let grid = daysInGrid
+        guard let firstDay = grid.first, let lastDay = grid.last else { return }
+        allEvents = DataMock.events(from: firstDay, to: lastDay, calendar: calendar)
     }
 
     private var monthTitle: String {
