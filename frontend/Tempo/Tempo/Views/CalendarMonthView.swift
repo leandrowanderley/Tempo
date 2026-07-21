@@ -16,12 +16,20 @@ struct CalendarMonthView: View {
 
     private let calendar = CalendarMonthView.calendar
 
+    let filters: CalendarFilters
+
     @State private var displayedMonth = CalendarMonthView.calendar.startOfMonth(for: Date())
     @State private var selectedDate = CalendarMonthView.calendar.startOfDay(for: Date())
-    @State private var eventsByDay: [Date: [Event]] = [:]
+    @State private var allEvents: [Event] = []
 
     private var isShowingCurrentMonth: Bool {
         calendar.isDate(displayedMonth, equalTo: Date(), toGranularity: .month)
+    }
+
+    private var eventsByDay: [Date: [Event]] {
+        Dictionary(grouping: allEvents.filter(filters.matches)) { event in
+            calendar.startOfDay(for: event.startDate ?? Date())
+        }
     }
 
     private var selectedDayEvents: [Event] {
@@ -43,7 +51,8 @@ struct CalendarMonthView: View {
         .overlay(alignment: .top) {
             ScrollEdgeFadeOverlay()
         }
-        .onAppear(perform: loadEventsIfNeeded)
+        .onAppear(perform: loadEvents)
+        .onChange(of: displayedMonth) { _, _ in loadEvents() }
     }
 
     private var monthHeader: some View {
@@ -213,13 +222,8 @@ struct CalendarMonthView: View {
         }
     }
 
-    private func loadEventsIfNeeded() {
-        guard eventsByDay.isEmpty else { return }
-
-        let events = DataMock.events(calendar: calendar)
-        eventsByDay = Dictionary(grouping: events) { event in
-            calendar.startOfDay(for: event.startDate ?? Date())
-        }
+    private func loadEvents() {
+        allEvents = DataMock.events(around: displayedMonth, monthsBefore: 0, monthsAfter: 0, calendar: calendar)
     }
 
     private var monthTitle: String {
@@ -259,6 +263,6 @@ private extension Calendar {
 }
 
 #Preview {
-    CalendarMonthView()
+    CalendarMonthView(filters: .makeDefault())
         .background(Color.tempoBackground)
 }
