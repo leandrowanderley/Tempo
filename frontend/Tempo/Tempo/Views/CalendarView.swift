@@ -5,215 +5,90 @@
 
 import SwiftUI
 
-private enum CalendarViewMode {
-    case grid
-    case timeline
-}
-
-// TODO: Implementar grid mensal (project.md §3.3). Timeline semanal já funcional; grid ainda é placeholder.
 struct CalendarView: View {
-    @State private var viewMode: CalendarViewMode = .timeline
-    @State private var isShowingFilters = false
-    @State private var filters = CalendarFilters.makeDefault()
-    @State private var dates = CalendarMockData.dateRange()
+    private enum ViewMode {
+        case week, month
 
-    // Cache de `timelineItems`: a versão anterior era um `var` computado que refazia o
-    // pipeline inteiro (~12 mil chamadas de Calendar) a cada reavaliação do `body` — inclusive
-    // durante o `withAnimation` do toggle de view mode, que reavalia o body a cada frame da
-    // animação, e mesmo quando `viewMode == .grid` (onde o valor nem é usado). Agora só
-    // recalcula quando `filters`/`dates` de fato mudam, e adia o recálculo se a timeline não
-    // estiver visível no momento da mudança.
-    @State private var timelineItems: [CalendarTimelineItem] = []
-    @State private var needsTimelineRefresh = true
+        mutating func toggle() {
+            self = self == .week ? .month : .week
+        }
 
-    // Mês exibido no cabeçalho: acompanha o dia que está na borda da timeline enquanto o
-    // usuário rola horizontalmente (ver WeekTimelineView.updateVisibleMonth). Começa em
-    // hoje, que é pra onde a timeline rola no primeiro load.
-    @State private var visibleMonthDate = Date()
+        var toggleSystemImage: String {
+            switch self {
+            case .week: return "rectangle.grid.1x2"
+            case .month: return "rectangle.grid.3x2"
+            }
+        }
 
-    private static let periodLabelFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "pt_BR")
-        formatter.dateFormat = "LLLL"
-        return formatter
-    }()
-
-    var body: some View {
-        CalendarContentView(
-            viewMode: viewMode,
-            dates: dates,
-            timelineItems: timelineItems,
-            visibleMonthDate: $visibleMonthDate
-        )
-            .safeAreaInset(edge: .top, spacing: 0) {
-                header
+        var placeholderTitle: String {
+            switch self {
+            case .week: return "Visão Semanal"
+            case .month: return "Visão Mensal"
             }
-            .background(Color.tempoBackground.ignoresSafeArea())
-            .sheet(isPresented: $isShowingFilters) {
-                CalendarFilterView(filters: $filters)
-            }
-            .onAppear(perform: refreshTimelineItemsIfNeeded)
-            .onChange(of: viewMode) { _, newValue in
-                if newValue == .timeline {
-                    refreshTimelineItemsIfNeeded()
-                }
-            }
-            .onChange(of: filters) { _, _ in
-                needsTimelineRefresh = true
-                if viewMode == .timeline {
-                    refreshTimelineItemsIfNeeded()
-                }
-            }
+        }
     }
 
-    private func refreshTimelineItemsIfNeeded() {
-        guard needsTimelineRefresh else { return }
+    @State private var viewMode: ViewMode = .week
 
-        var allItems = CalendarMockData.events(for: dates)
-
-        if filters.showRoutines {
-            allItems += CalendarMockData.routineItems(for: dates)
+    var body: some View {
+        VStack(spacing: 0) {
+            switch viewMode {
+            case .week:
+                placeholder
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .month:
+                CalendarMonthView()
+            }
         }
-        if filters.showFixedCommitments {
-            allItems += CalendarMockData.fixedCommitmentItems(for: dates)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            header
         }
-
-        timelineItems = allItems.filter { item in
-            (!item.isTask || filters.showTasks) && filters.selectedCategories.contains(item.category)
-        }
-        needsTimelineRefresh = false
+        .background(Color.tempoBackground.ignoresSafeArea())
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center) {
-                viewModeToggle
-                Spacer()
-                TopActionsBarView()
+        HStack(alignment: .center) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    viewMode.toggle()
+                }
+            } label: {
+                Image(systemName: viewMode.toggleSystemImage)
+                    .font(.system(size: 17, weight: .medium))
+                    .foregroundColor(.tempoPrimary)
+                    .frame(width: 36, height: 36)
+                    .background(Color.tempoCard)
+                    .clipShape(Circle())
+                    .overlay(
+                        Circle().stroke(Color.tempoBorder, lineWidth: 1)
+                    )
             }
 
-            HStack(alignment: .center) {
-                Text(periodLabel)
-                    .font(.title2.weight(.bold))
-                    .foregroundColor(isViewingCurrentMonth ? .tempoPrimary : .tempoTextPrimary)
+            Spacer()
 
-                Spacer()
-
-                filterButton
-            }
+            TopActionsBarView()
         }
         .padding(20)
         .background(Color.tempoBackground)
     }
 
-    private var viewModeToggle: some View {
-        Button {
-            withAnimation(.easeInOut) {
-                viewMode = viewMode == .grid ? .timeline : .grid
-            }
-        } label: {
-            Image(systemName: viewMode == .grid ? "rectangle.grid.3x2" : "rectangle.grid.1x2")
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.tempoTextPrimary)
-                .frame(width: 36, height: 36)
-                .background(Color.tempoCard)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.tempoBorder, lineWidth: 1)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-        }
-    }
-
-    private var filterButton: some View {
-        Button {
-            isShowingFilters = true
-        } label: {
-            Image(systemName: "line.3.horizontal")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.tempoTextPrimary)
-                .frame(width: 36, height: 36)
-                .background(Color.tempoCard)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(Color.tempoBorder, lineWidth: 1)
-                )
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-        }
-    }
-
-    private var periodLabel: String {
-        Self.periodLabelFormatter.string(from: visibleMonthDate).capitalized
-    }
-
-    private var isViewingCurrentMonth: Bool {
-        Calendar.current.isDate(visibleMonthDate, equalTo: Date(), toGranularity: .month)
-    }
-}
-
-// Isolado num View próprio para que a troca de `viewMode` reconstrua só este
-// subtree. Quando o `switch` ficava direto no body do `CalendarView` (conteúdo
-// raiz da aba no TabView), a mudança de identidade do subtree fazia o
-// UITabBarController resetar a seleção pra primeira aba (Home) por um frame.
-//
-// As duas variantes ficam sempre montadas (alternando só opacidade/hit-testing) em vez
-// de um `switch` que troca a identidade da view: a `WeekTimelineView` guarda estado
-// pesado (`itemsByDay`, posição de scroll) que, se recriado a cada toggle, força
-// reagrupar ~4 mil itens e re-executar o scroll-to-hoje (que por sua vez obriga a
-// LazyHStack a desenhar todas as colunas entre o início do range e hoje) toda vez que o
-// usuário volta pra essa visão — daí o delay perceptível no toggle.
-private struct CalendarContentView: View {
-    let viewMode: CalendarViewMode
-    let dates: [Date]
-    let timelineItems: [CalendarTimelineItem]
-    @Binding var visibleMonthDate: Date
-
-    var body: some View {
-        ZStack {
-            ScrollView {
-                placeholder(
-                    icon: "calendar",
-                    title: "Visão mensal em construção",
-                    message: "Em breve: grade do mês com a agenda do dia selecionado."
-                )
-                .padding(.horizontal, 20)
-                .padding(.top, ScrollEdgeFadeOverlay.height)
-                .padding(.bottom, Layout.tabBarClearance)
-            }
-            .overlay(alignment: .top) {
-                ScrollEdgeFadeOverlay()
-            }
-            .opacity(viewMode == .grid ? 1 : 0)
-            .allowsHitTesting(viewMode == .grid)
-            .accessibilityHidden(viewMode != .grid)
-
-            // Sem ScrollEdgeFadeOverlay aqui: a linha de dias da timeline já fica fixa
-            // no topo (não desliza por baixo do header), então o fade não se aplica.
-            WeekTimelineView(dates: dates, items: timelineItems, visibleMonthDate: $visibleMonthDate)
-                .opacity(viewMode == .timeline ? 1 : 0)
-                .allowsHitTesting(viewMode == .timeline)
-                .accessibilityHidden(viewMode != .timeline)
-        }
-    }
-
-    private func placeholder(icon: String, title: String, message: String) -> some View {
+    private var placeholder: some View {
         VStack(spacing: 12) {
-            Image(systemName: icon)
+            Image(systemName: viewMode.toggleSystemImage)
                 .font(.system(size: 40))
                 .foregroundColor(.tempoTextSecondary)
 
-            Text(title)
+            Text(viewMode.placeholderTitle)
                 .font(.headline)
                 .foregroundColor(.tempoTextPrimary)
 
-            Text(message)
+            Text("Estamos construindo essa tela. Volte em breve.")
                 .font(.subheadline)
                 .foregroundColor(.tempoTextSecondary)
                 .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 80)
         .padding(.horizontal, 24)
+        .padding(.bottom, Layout.tabBarClearance)
     }
 }
 

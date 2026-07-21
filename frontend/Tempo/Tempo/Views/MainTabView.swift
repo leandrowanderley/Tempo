@@ -43,6 +43,29 @@ struct MainTabView: View {
     }
 }
 
+// Calendário está sendo refeito do zero — placeholder até a nova implementação.
+private struct CalendarPlaceholderView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "calendar")
+                .font(.system(size: 40))
+                .foregroundColor(.tempoTextSecondary)
+
+            Text("Calendário em construção")
+                .font(.headline)
+                .foregroundColor(.tempoTextPrimary)
+
+            Text("Estamos refazendo essa tela. Volte em breve.")
+                .font(.subheadline)
+                .foregroundColor(.tempoTextSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 24)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.tempoBackground.ignoresSafeArea())
+    }
+}
+
 #Preview {
     MainTabView()
         .environmentObject(AuthViewModel())
