@@ -27,10 +27,13 @@ struct EventFormView: View {
 
     @ObservedObject private var customCategoryStore = CustomCategoryStore.shared
 
-    private let categories = ["Faculdade", "Trabalho", "Treinos", "Habitos"]
+    private let categories = ["Faculdade", "Trabalho", "Treinos", "Habitos", "Aniversário"]
 
+    /// "Aniversário" só faz sentido pra Evento (tem data certa) — some da lista
+    /// no modo Tarefa em vez de aparecer como opção sem efeito.
     private var allCategoryOptions: [String] {
-        categories + customCategoryStore.categories.map(\.name)
+        let all = categories + customCategoryStore.categories.map(\.name)
+        return isTask ? all.filter { $0 != "Aniversário" } : all
     }
 
     init(existingEvent: Event? = nil, onSave: @escaping (Event) -> Void = { _ in }) {
@@ -79,6 +82,11 @@ struct EventFormView: View {
         }
         .background(Color.tempoBackground.ignoresSafeArea())
         .presentationDragIndicator(.visible)
+        .onChange(of: isTask) { _, newValue in
+            if newValue && category == "Aniversário" {
+                category = categories[0]
+            }
+        }
     }
 
     private var header: some View {

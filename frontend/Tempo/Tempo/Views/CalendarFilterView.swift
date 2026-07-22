@@ -13,7 +13,7 @@ struct CalendarFilters: Equatable {
     var showTasks = true
     var selectedCategories: Set<String>
 
-    static let baseCategories = ["Faculdade", "Trabalho", "Treinos", "Habitos"]
+    static let baseCategories = ["Faculdade", "Trabalho", "Treinos", "Habitos", "Aniversário"]
 
     static func makeDefault() -> CalendarFilters {
         CalendarFilters(selectedCategories: Set(baseCategories))

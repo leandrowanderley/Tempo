@@ -7,39 +7,39 @@ import SwiftUI
 
 struct CalendarView: View {
     private enum ViewMode {
-        case week, month
+        case month, period
 
         mutating func toggle() {
-            self = self == .week ? .month : .week
+            self = self == .month ? .period : .month
         }
 
         var toggleSystemImage: String {
             switch self {
-            case .week: return "rectangle.grid.1x2"
             case .month: return "rectangle.grid.3x2"
+            case .period: return "rectangle.grid.1x3"
             }
         }
 
         var placeholderTitle: String {
             switch self {
-            case .week: return "Visão Semanal"
             case .month: return "Visão Mensal"
+            case .period: return "Visão de Período"
             }
         }
     }
 
-    @State private var viewMode: ViewMode = .week
+    @State private var viewMode: ViewMode = .month
     @State private var filters = CalendarFilters.makeDefault()
     @State private var isShowingFilters = false
 
     var body: some View {
         VStack(spacing: 0) {
             switch viewMode {
-            case .week:
-                placeholder
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             case .month:
                 CalendarMonthView(filters: filters)
+            case .period:
+                placeholder
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {

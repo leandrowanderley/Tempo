@@ -21,6 +21,7 @@ extension Color {
     static let catWork = Color(hex: "#FF9500")
     static let catWorkout = Color(hex: "#34C759")
     static let catHabit = Color(hex: "#AF52DE")
+    static let catBirthday = Color(hex: "#FF375F")
 
     static let tempoStrava = Color(hex: "#FC4C02")
     static let tempoHealth = Color(hex: "#FF2D55")
@@ -31,6 +32,7 @@ extension Color {
         case "Trabalho": return .catWork
         case "Treinos": return .catWorkout
         case "Habitos": return .catHabit
+        case "Aniversário": return .catBirthday
         default: return CustomCategoryStore.shared.color(for: category) ?? .tempoTextSecondary
         }
     }
