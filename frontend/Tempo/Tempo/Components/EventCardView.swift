@@ -8,51 +8,71 @@ import SwiftUI
 struct EventCardView: View {
     let event: Event
     var onSave: (Event) -> Void = { _ in }
+    var onToggleDone: () -> Void = {}
 
     @State private var isShowingDetail = false
 
     var body: some View {
-        Button {
-            isShowingDetail = true
-        } label: {
-            HStack(spacing: 12) {
-                CategoryDotView(category: event.category)
+        HStack(spacing: 12) {
+            if event.isTask {
+                doneToggleButton
+            }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(event.title)
-                        .font(.body)
-                        .foregroundColor(.tempoTextPrimary)
+            Button {
+                isShowingDetail = true
+            } label: {
+                HStack(spacing: 12) {
+                    CategoryDotView(category: event.category)
 
-                    if let notes = event.notes, !notes.isEmpty {
-                        Text(notes)
-                            .font(.caption)
-                            .foregroundColor(.tempoTextSecondary)
-                            .lineLimit(1)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(event.title)
+                            .font(.body)
+                            .foregroundColor(event.isDone ? .tempoTextSecondary : .tempoTextPrimary)
+                            .strikethrough(event.isDone)
+
+                        if let notes = event.notes, !notes.isEmpty {
+                            Text(notes)
+                                .font(.caption)
+                                .foregroundColor(.tempoTextSecondary)
+                                .lineLimit(1)
+                        }
+
+                        statusTag
                     }
 
-                    statusTag
-                }
+                    Spacer()
 
-                Spacer()
-
-                if !timeLabel.isEmpty {
-                    Text(timeLabel)
-                        .font(.subheadline)
-                        .foregroundColor(.tempoTextSecondary)
+                    if !timeLabel.isEmpty {
+                        Text(timeLabel)
+                            .font(.subheadline)
+                            .foregroundColor(.tempoTextSecondary)
+                    }
                 }
             }
-            .padding()
-            .background(Color.tempoCard)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.tempoBorder, lineWidth: 1)
-            )
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
+        .padding()
+        .background(Color.tempoCard)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.tempoBorder, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .opacity(event.isDone ? 0.5 : 1)
         .sheet(isPresented: $isShowingDetail) {
             EventFormView(existingEvent: event, onSave: onSave)
         }
+    }
+
+    private var doneToggleButton: some View {
+        Button {
+            onToggleDone()
+        } label: {
+            Image(systemName: event.isDone ? "checkmark.circle.fill" : "circle")
+                .font(.title3)
+                .foregroundColor(event.isDone ? .tempoTextPrimary : .tempoDisabled)
+        }
+        .buttonStyle(.plain)
     }
 
     private var timeLabel: String {

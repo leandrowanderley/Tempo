@@ -9,9 +9,9 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
 
-    private let today = HomeMockData.today
-    private let tomorrow = HomeMockData.tomorrow
-    private let unscheduledTasks = HomeMockData.unscheduledTasks
+    @State private var today = HomeMockData.today
+    @State private var tomorrow = HomeMockData.tomorrow
+    @State private var unscheduledTasks = HomeMockData.unscheduledTasks
     private let routines = RoutineMockData.workouts + RoutineMockData.habits
 
     var body: some View {
@@ -69,10 +69,20 @@ struct HomeView: View {
 
                 VStack(spacing: 10) {
                     ForEach(events) { event in
-                        EventCardView(event: event)
+                        EventCardView(event: event, onToggleDone: { toggleDone(for: event) })
                     }
                 }
             }
+        }
+    }
+
+    private func toggleDone(for event: Event) {
+        if let index = today.firstIndex(where: { $0.id == event.id }) {
+            today[index].isDone.toggle()
+        } else if let index = tomorrow.firstIndex(where: { $0.id == event.id }) {
+            tomorrow[index].isDone.toggle()
+        } else if let index = unscheduledTasks.firstIndex(where: { $0.id == event.id }) {
+            unscheduledTasks[index].isDone.toggle()
         }
     }
 }

@@ -24,6 +24,19 @@ enum DataMock {
         return oneOffEvents(for: dates, calendar: calendar)
             + routineEvents(for: dates, calendar: calendar)
             + fixedCommitmentEvents(for: dates, calendar: calendar)
+            + fixedDateEvents(for: dates, calendar: calendar)
+    }
+
+    /// Fonte dedicada da Visão de Período (Future Log do Bullet Journal): só os marcos de
+    /// data fixa (aniversários, viagens, entregas importantes) — nunca a agenda recorrente
+    /// semanal (compromissos/tarefas do dia a dia), que faria a página perder a simplicidade
+    /// que é o ponto central do método.
+    static func periodEvents(
+        from startDate: Date,
+        to endDate: Date,
+        calendar: Calendar = .current
+    ) -> [Event] {
+        fixedDateEvents(for: dateRange(from: startDate, to: endDate, calendar: calendar), calendar: calendar)
     }
 
     /// Conveniência sobre `events(from:to:)` para quando o chamador pensa em "meses ao redor
@@ -138,6 +151,50 @@ enum DataMock {
                     )
                 }
             }
+        }
+    }
+
+    private struct FixedSample {
+        let month: Int
+        let day: Int
+        let durationDays: Int
+        let title: String
+        let category: String
+        let isTask: Bool
+    }
+
+    /// Marcos de data fixa (mês+dia), não recorrentes por dia da semana — poucos, e só os
+    /// realmente importantes: aniversários, uma viagem, entregas com prazo certo. É de propósito
+    /// uma lista curta (§7 do spec: "poucos itens é o objetivo, não uma limitação").
+    private static let fixedSamples: [FixedSample] = [
+        FixedSample(month: 7, day: 30, durationDays: 1, title: "Aniversário da Marina", category: "Aniversário", isTask: false),
+        FixedSample(month: 8, day: 20, durationDays: 5, title: "Viagem a SP", category: "Trabalho", isTask: false),
+        FixedSample(month: 8, day: 28, durationDays: 1, title: "Entrega do TCC", category: "Faculdade", isTask: true),
+        FixedSample(month: 9, day: 12, durationDays: 1, title: "Aniversário do Pedro", category: "Aniversário", isTask: false),
+        FixedSample(month: 10, day: 6, durationDays: 1, title: "Prova Final de Cálculo", category: "Faculdade", isTask: true),
+        FixedSample(month: 11, day: 3, durationDays: 1, title: "Formatura", category: "Faculdade", isTask: false),
+        FixedSample(month: 12, day: 24, durationDays: 2, title: "Ceia de Natal em Família", category: "Habitos", isTask: false)
+    ]
+
+    private static func fixedDateEvents(for dates: [Date], calendar: Calendar) -> [Event] {
+        dates.compactMap { date -> Event? in
+            let components = calendar.dateComponents([.year, .month, .day], from: date)
+            guard let year = components.year, let month = components.month, let day = components.day,
+                  let sample = fixedSamples.first(where: { $0.month == month && $0.day == day }),
+                  let start = calendar.date(from: DateComponents(year: year, month: sample.month, day: sample.day)),
+                  let end = calendar.date(byAdding: .day, value: sample.durationDays - 1, to: start) else { return nil }
+
+            return Event(
+                id: "fixed-date-\(sample.title)-\(year)",
+                title: sample.title,
+                notes: nil,
+                isAllDay: !sample.isTask,
+                startDate: sample.isTask ? nil : start,
+                endDate: end,
+                category: sample.category,
+                isTask: sample.isTask,
+                isDone: false
+            )
         }
     }
 

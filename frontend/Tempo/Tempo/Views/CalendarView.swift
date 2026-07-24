@@ -19,13 +19,6 @@ struct CalendarView: View {
             case .period: return "rectangle.grid.1x3"
             }
         }
-
-        var placeholderTitle: String {
-            switch self {
-            case .month: return "Visão Mensal"
-            case .period: return "Visão de Período"
-            }
-        }
     }
 
     @State private var viewMode: ViewMode = .month
@@ -38,8 +31,7 @@ struct CalendarView: View {
             case .month:
                 CalendarMonthView(filters: filters)
             case .period:
-                placeholder
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                CalendarPeriodView(filters: filters)
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {
@@ -95,25 +87,6 @@ struct CalendarView: View {
 
     private var isFilterActive: Bool {
         filters != .makeDefault()
-    }
-
-    private var placeholder: some View {
-        VStack(spacing: 12) {
-            Image(systemName: viewMode.toggleSystemImage)
-                .font(.system(size: 40))
-                .foregroundColor(.tempoTextSecondary)
-
-            Text(viewMode.placeholderTitle)
-                .font(.headline)
-                .foregroundColor(.tempoTextPrimary)
-
-            Text("Estamos construindo essa tela. Volte em breve.")
-                .font(.subheadline)
-                .foregroundColor(.tempoTextSecondary)
-                .multilineTextAlignment(.center)
-        }
-        .padding(.horizontal, 24)
-        .padding(.bottom, Layout.tabBarClearance)
     }
 }
 
