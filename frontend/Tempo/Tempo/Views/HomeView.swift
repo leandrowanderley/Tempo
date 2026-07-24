@@ -13,13 +13,15 @@ struct HomeView: View {
     @State private var tomorrow = HomeMockData.tomorrow
     @State private var unscheduledTasks = HomeMockData.unscheduledTasks
     private let routines = RoutineMockData.workouts + RoutineMockData.habits
+    // TODO: mockado — trocar pela sequência real assim que o back-end calcular streakWeeks (ver TODO.MD).
+    private let streakWeeks = 5
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 WeeklyProgressWidgetView(
                     routines: routines,
-                    motivationalMessage: "You're doing great!"
+                    streakWeeks: streakWeeks
                 )
 
                 sectionList(title: "O Que Temos Hoje", events: today)

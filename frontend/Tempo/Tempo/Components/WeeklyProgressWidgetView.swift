@@ -10,41 +10,69 @@ import SwiftUI
 
 struct WeeklyProgressWidgetView: View {
     let routines: [Routine]
-    let motivationalMessage: String
+    let streakWeeks: Int
+
+    private var motivationalMessage: String {
+        HabitStreakMessages.message(forWeeks: streakWeeks)
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 8) {
-                Image(systemName: "figure.run")
-                    .foregroundColor(.tempoStrava)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 15) {
+                HStack(spacing: 4) {
+                    Image(systemName: "balloon") // "bolt", "balloon", "flame.fill"
+                        .font(.largeTitle)
+                        .foregroundColor(streakWeeks >= 1 ? .orange : Color(.systemGray3))
+                    Text("\(streakWeeks)")
+                        .font(.title.weight(.bold))
+                        .foregroundColor(streakWeeks >= 1 ? .orange : .tempoTextSecondary)
+                }
+//                Image(systemName: "figure.run")
+//                    .foregroundColor(.tempoStrava)
                 Text(motivationalMessage)
-                    .font(.subheadline.weight(.semibold))
+                    .font(.headline)
                     .foregroundColor(.tempoTextPrimary)
-                Spacer()
+                //Spacer()
+
+//                HStack(spacing: 4) {
+//                    Image(systemName: "balloon") // "bolt", "balloon", "flame.fill"
+//                        .font(.largeTitle)
+//                        .foregroundColor(streakWeeks >= 1 ? .orange : Color(.systemGray3))
+//                    Text("\(streakWeeks)")
+//                        .font(.title.weight(.bold))
+//                        .foregroundColor(streakWeeks >= 1 ? .orange : .tempoTextSecondary)
+//                }
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
+                HStack(spacing: 20) {
                     ForEach(routines) { routine in
-                        VStack(spacing: 8) {
+                        VStack(spacing: 10) {
                             ZStack {
                                 ProgressRingView(
                                     progress: routine.progress,
-                                    color: routine.type == .workout ? .tempoStrava : .catHabit
+                                    color: routine.type == .workout ? .tempoStrava : .catHabit,
+                                    lineWidth: 7
                                 )
-                                .frame(width: 52, height: 52)
+                                .frame(width: 58, height: 58)
 
-                                Text("\(routine.currentCount)/\(routine.targetCount)")
-                                    .font(.caption2.weight(.bold))
+                                Text("\(Int((routine.progress * 100).rounded()))%")
+                                    .font(.caption.weight(.bold))
                                     .foregroundColor(.tempoTextPrimary)
                             }
 
-                            Text(routine.title)
-                                .font(.caption2)
-                                .foregroundColor(.tempoTextSecondary)
-                                .lineLimit(1)
+                            VStack(spacing: 2) {
+                                Text(routine.title)
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundColor(.tempoTextPrimary)
+                                    .lineLimit(1)
+
+                                Text("\(routine.currentCount)/\(routine.targetCount)")
+                                    .font(.caption2)
+                                    .foregroundColor(.tempoTextSecondary)
+                            }
                         }
-                        .frame(width: 60)
+                        .frame(width: 66)
                     }
                 }
                 .padding(.vertical, 6)
@@ -63,11 +91,11 @@ struct WeeklyProgressWidgetView: View {
                 )
             )
         }
-        .padding()
+        .padding(20)
         .background(Color.tempoCard)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: 20))
         .overlay(
-            RoundedRectangle(cornerRadius: 16).stroke(Color.tempoBorder, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 20).stroke(Color.tempoBorder, lineWidth: 1)
         )
     }
 }
@@ -79,7 +107,7 @@ struct WeeklyProgressWidgetView: View {
             Routine(id: "2", title: "Superior", type: .workout, targetCount: 1, currentCount: 1),
             Routine(id: "3", title: "Meditação", type: .habit, targetCount: 5, currentCount: 2)
         ],
-        motivationalMessage: "You're doing great!"
+        streakWeeks: 5
     )
     .padding()
     .background(Color.tempoBackground)
