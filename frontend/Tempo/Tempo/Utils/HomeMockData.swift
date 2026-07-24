@@ -18,7 +18,7 @@ enum HomeMockData {
             endDate: Date().addingTimeInterval(-3600),
             category: "Faculdade",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone
         ),
         Event(
             id: "e2",
@@ -29,7 +29,7 @@ enum HomeMockData {
             endDate: Date().addingTimeInterval(1800),
             category: "Treinos",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone
         ),
         Event(
             id: "e3",
@@ -40,7 +40,7 @@ enum HomeMockData {
             endDate: Date().addingTimeInterval(9000),
             category: "Trabalho",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone
         ),
         Event(
             id: "e4",
@@ -51,32 +51,7 @@ enum HomeMockData {
             endDate: Date().addingTimeInterval(13500),
             category: "Habitos",
             isTask: false,
-            isDone: false
-        )
-    ]
-
-    static let tomorrow: [Event] = [
-        Event(
-            id: "e5",
-            title: "Aula de PAA",
-            notes: nil,
-            isAllDay: false,
-            startDate: Date().addingTimeInterval(86400 + 32400),
-            endDate: Date().addingTimeInterval(86400 + 39600),
-            category: "Faculdade",
-            isTask: false,
-            isDone: false
-        ),
-        Event(
-            id: "e6",
-            title: "Treino de Inferior",
-            notes: nil,
-            isAllDay: false,
-            startDate: Date().addingTimeInterval(86400 + 61200),
-            endDate: Date().addingTimeInterval(86400 + 64800),
-            category: "Treinos",
-            isTask: false,
-            isDone: false
+            completionStatus: .notDone
         )
     ]
 
@@ -90,7 +65,7 @@ enum HomeMockData {
             endDate: nil,
             category: "Faculdade",
             isTask: true,
-            isDone: false
+            completionStatus: .notDone
         ),
         Event(
             id: "e8",
@@ -101,7 +76,7 @@ enum HomeMockData {
             endDate: nil,
             category: "Trabalho",
             isTask: true,
-            isDone: false
+            completionStatus: .notDone
         )
     ]
 }

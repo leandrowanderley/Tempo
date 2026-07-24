@@ -238,7 +238,7 @@ struct EventFormView: View {
             endDate: isTask ? (hasDueDate ? dueDate : nil) : endDate,
             category: category,
             isTask: isTask,
-            isDone: existingEvent?.isDone ?? false
+            completionStatus: existingEvent?.completionStatus ?? .notDone
         )
 
         onSave(event)

@@ -97,7 +97,7 @@ enum DataMock {
                     endDate: end,
                     category: sample.category,
                     isTask: sample.isTask,
-                    isDone: false
+                    completionStatus: .notDone
                 )
             }
         }
@@ -123,7 +123,7 @@ enum DataMock {
                         endDate: end,
                         category: routine.type == .workout ? "Treinos" : "Habitos",
                         isTask: false,
-                        isDone: false
+                        completionStatus: .notDone
                     )
                 }
             }
@@ -147,7 +147,7 @@ enum DataMock {
                         endDate: end,
                         category: commitment.category,
                         isTask: false,
-                        isDone: false
+                        completionStatus: .notDone
                     )
                 }
             }
@@ -193,7 +193,7 @@ enum DataMock {
                 endDate: end,
                 category: sample.category,
                 isTask: sample.isTask,
-                isDone: false
+                completionStatus: .notDone
             )
         }
     }

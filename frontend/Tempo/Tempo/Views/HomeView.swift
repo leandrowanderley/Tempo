@@ -10,7 +10,6 @@ struct HomeView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
 
     @State private var today = HomeMockData.today
-    @State private var tomorrow = HomeMockData.tomorrow
     @State private var unscheduledTasks = HomeMockData.unscheduledTasks
     private let routines = RoutineMockData.workouts + RoutineMockData.habits
     // TODO: mockado — trocar pela sequência real assim que o back-end calcular streakWeeks (ver TODO.MD).
@@ -24,8 +23,8 @@ struct HomeView: View {
                     streakWeeks: streakWeeks
                 )
 
-                sectionList(title: "O Que Temos Hoje", events: today)
-                sectionList(title: "Amanhã", events: tomorrow)
+                sectionList(title: "O Que Temos Hoje", events: upcomingToday)
+                sectionList(title: "Atrasados", events: overdueEvents)
                 sectionList(title: "Sem Data", events: unscheduledTasks)
             }
             .padding(.horizontal, 20)
@@ -61,6 +60,14 @@ struct HomeView: View {
         .background(Color.tempoBackground)
     }
 
+    private var upcomingToday: [Event] {
+        today.filter { !$0.hasEnded }
+    }
+
+    private var overdueEvents: [Event] {
+        (today + unscheduledTasks).filter { $0.isLate }
+    }
+
     @ViewBuilder
     private func sectionList(title: String, events: [Event]) -> some View {
         if !events.isEmpty {
@@ -71,20 +78,18 @@ struct HomeView: View {
 
                 VStack(spacing: 10) {
                     ForEach(events) { event in
-                        EventCardView(event: event, onToggleDone: { toggleDone(for: event) })
+                        EventCardView(event: event, onStatusChange: { setStatus($0, for: event) })
                     }
                 }
             }
         }
     }
 
-    private func toggleDone(for event: Event) {
+    private func setStatus(_ status: EventCompletionStatus, for event: Event) {
         if let index = today.firstIndex(where: { $0.id == event.id }) {
-            today[index].isDone.toggle()
-        } else if let index = tomorrow.firstIndex(where: { $0.id == event.id }) {
-            tomorrow[index].isDone.toggle()
+            today[index].completionStatus = status
         } else if let index = unscheduledTasks.firstIndex(where: { $0.id == event.id }) {
-            unscheduledTasks[index].isDone.toggle()
+            unscheduledTasks[index].completionStatus = status
         }
     }
 }

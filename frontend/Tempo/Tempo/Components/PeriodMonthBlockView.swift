@@ -215,8 +215,8 @@ struct PeriodMonthBlockView: View {
             PeriodMonthBlockView(
                 monthDate: Date(),
                 entries: [
-                    Event(id: "1", title: "Aniversário da Marina", notes: nil, isAllDay: true, startDate: Date(), endDate: Date(), category: "Aniversário", isTask: false, isDone: false),
-                    Event(id: "2", title: "Entrega do TCC", notes: nil, isAllDay: false, startDate: nil, endDate: Date(), category: "Faculdade", isTask: true, isDone: false)
+                    Event(id: "1", title: "Aniversário da Marina", notes: nil, isAllDay: true, startDate: Date(), endDate: Date(), category: "Aniversário", isTask: false, completionStatus: .notDone),
+                    Event(id: "2", title: "Entrega do TCC", notes: nil, isAllDay: false, startDate: nil, endDate: Date(), category: "Faculdade", isTask: true, completionStatus: .notDone)
                 ],
                 style: .wide,
                 onSelect: { _ in },
