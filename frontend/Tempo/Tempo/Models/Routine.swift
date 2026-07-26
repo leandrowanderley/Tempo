@@ -20,6 +20,8 @@ struct Routine: Codable, Identifiable {
     var targetCount: Int
     var currentCount: Int
     var occurrences: [RoutineOccurrence] = []
+    var createdAt: Date = Date()
+    var deletedAt: Date?
 }
 
 extension Routine {

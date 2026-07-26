@@ -78,7 +78,7 @@ enum RoutineMockData {
             title: "Aula de PAA",
             notes: nil,
             category: "Faculdade",
-            weekdays: [.monday, .thursday],
+            daysOfWeek: [.monday, .thursday],
             startTime: time(9, 0),
             endTime: time(11, 0)
         ),
@@ -87,11 +87,39 @@ enum RoutineMockData {
             title: "Edge Academy",
             notes: nil,
             category: "Trabalho",
-            weekdays: [.tuesday, .thursday],
+            daysOfWeek: [.tuesday, .thursday],
             startTime: time(19, 0),
             endTime: time(21, 0)
         )
     ]
+
+    /// Usado só pelo calendário de Histórico (03-calendario-historico-ui.md): inclui uma
+    /// rotina de exemplo já (soft) deletada, pra exercitar o cálculo de janela
+    /// createdAt/deletedAt em semanas passadas — não deve alimentar o Routine Planner.
+    static var allIncludingDeleted: [Routine] {
+        workouts + habits + [deletedHabitSample]
+    }
+
+    private static let deletedHabitSample: Routine = {
+        let calendar = Calendar.current
+        let createdAt = calendar.date(byAdding: .month, value: -3, to: Date()) ?? Date()
+        let deletedAt = calendar.date(byAdding: .month, value: -1, to: Date()) ?? Date()
+
+        return Routine(
+            id: "h-deleted-1",
+            title: "Yoga",
+            type: .habit,
+            targetCount: 3,
+            currentCount: 0,
+            occurrences: [
+                occurrence(.tuesday, 7, 8),
+                occurrence(.thursday, 7, 8),
+                occurrence(.saturday, 7, 8)
+            ],
+            createdAt: createdAt,
+            deletedAt: deletedAt
+        )
+    }()
 
     private static func time(_ hour: Int, _ minute: Int) -> Date {
         Calendar.current.date(bySettingHour: hour, minute: minute, second: 0, of: Date()) ?? Date()

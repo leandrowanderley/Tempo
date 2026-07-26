@@ -19,7 +19,7 @@ struct FixedCommitmentFormView: View {
     @State private var title: String
     @State private var notes: String
     @State private var category: String
-    @State private var weekdays: Set<Weekday>
+    @State private var daysOfWeek: Set<Weekday>
     @State private var startTime: Date
     @State private var endTime: Date
     @State private var isShowingAddCategory = false
@@ -43,13 +43,13 @@ struct FixedCommitmentFormView: View {
         _title = State(initialValue: existingCommitment?.title ?? "")
         _notes = State(initialValue: existingCommitment?.notes ?? "")
         _category = State(initialValue: existingCommitment?.category ?? categories[0])
-        _weekdays = State(initialValue: Set(existingCommitment?.weekdays ?? []))
+        _daysOfWeek = State(initialValue: Set(existingCommitment?.daysOfWeek ?? []))
         _startTime = State(initialValue: existingCommitment?.startTime ?? Date())
         _endTime = State(initialValue: existingCommitment?.endTime ?? Date().addingTimeInterval(3600))
     }
 
     private var isFormValid: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty && !weekdays.isEmpty
+        !title.trimmingCharacters(in: .whitespaces).isEmpty && !daysOfWeek.isEmpty
     }
 
     var body: some View {
@@ -188,13 +188,13 @@ struct FixedCommitmentFormView: View {
     }
 
     private func weekdayChip(_ day: Weekday) -> some View {
-        let isSelected = weekdays.contains(day)
+        let isSelected = daysOfWeek.contains(day)
 
         return Button {
             if isSelected {
-                weekdays.remove(day)
+                daysOfWeek.remove(day)
             } else {
-                weekdays.insert(day)
+                daysOfWeek.insert(day)
             }
         } label: {
             Text(day.shortLabel.prefix(1))
@@ -209,6 +209,8 @@ struct FixedCommitmentFormView: View {
         }
     }
 
+    // TODO: Voltar a chamar APIService.deleteFixedCommitment(id:) quando o back-end estiver
+    // pronto, e só remover da lista local depois da chamada ter sucesso.
     private func deleteButton(action: @escaping () -> Void) -> some View {
         Button {
             action()
@@ -230,15 +232,18 @@ struct FixedCommitmentFormView: View {
         }
     }
 
+    // TODO: Voltar a chamar APIService.createFixedCommitment/updateFixedCommitment quando o
+    // back-end estiver pronto. Por enquanto, salva só localmente (mock) e devolve pro chamador via onSave.
     private func save() {
         let commitment = FixedCommitment(
             id: existingCommitment?.id ?? UUID().uuidString,
             title: title.trimmingCharacters(in: .whitespaces),
             notes: notes.isEmpty ? nil : notes,
             category: category,
-            weekdays: weekdays.sorted { $0.rawValue < $1.rawValue },
+            daysOfWeek: daysOfWeek.sorted { $0.rawValue < $1.rawValue },
             startTime: startTime,
-            endTime: endTime
+            endTime: endTime,
+            createdAt: existingCommitment?.createdAt ?? Date()
         )
 
         onSave(commitment)
