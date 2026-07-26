@@ -23,6 +23,9 @@ struct Event: Codable, Identifiable {
     var category: String
     var isTask: Bool
     var completionStatus: EventCompletionStatus = .notDone
+    /// Só vale pra Evento (não Tarefa): dispensa data fixa e fica em aberto por
+    /// 7 dias a partir de `startDate` (ver EventFormView.save()).
+    var isFlexible: Bool = false
 }
 
 extension Event {

@@ -11,6 +11,7 @@ struct HomeView: View {
 
     @State private var today = HomeMockData.today
     @State private var unscheduledTasks = HomeMockData.unscheduledTasks
+    @State private var flexibleEvents = HomeMockData.flexibleEvents
     private let routines = RoutineMockData.workouts + RoutineMockData.habits
     // TODO: mockado — trocar pela sequência real assim que o back-end calcular streakWeeks (ver TODO.MD).
     private let streakWeeks = 5
@@ -25,6 +26,7 @@ struct HomeView: View {
 
                 sectionList(title: "O Que Temos Hoje", events: upcomingToday)
                 sectionList(title: "Atrasados", events: overdueEvents)
+                sectionList(title: "Eventos Flexíveis", events: activeFlexibleEvents)
                 sectionList(title: "Sem Data", events: unscheduledTasks)
             }
             .padding(.horizontal, 20)
@@ -47,7 +49,10 @@ struct HomeView: View {
                     .font(.title2.weight(.bold))
                     .foregroundColor(.tempoTextPrimary)
 
-                Text(Date().formatted(.dateTime.weekday(.wide).day().month(.wide)))
+                Text(Date().formatted(
+                    .dateTime.weekday(.wide).day().month(.wide)
+                        .locale(Locale(identifier: "pt_BR"))
+                ))
                     .font(.subheadline)
                     .foregroundColor(.tempoTextSecondary)
             }
@@ -65,7 +70,12 @@ struct HomeView: View {
     }
 
     private var overdueEvents: [Event] {
-        (today + unscheduledTasks).filter { $0.isLate }
+        (today + unscheduledTasks + flexibleEvents).filter { $0.isLate }
+    }
+
+    /// Eventos flexíveis ainda dentro da janela de 7 dias desde a criação.
+    private var activeFlexibleEvents: [Event] {
+        flexibleEvents.filter { !$0.hasEnded }
     }
 
     @ViewBuilder
@@ -90,6 +100,8 @@ struct HomeView: View {
             today[index].completionStatus = status
         } else if let index = unscheduledTasks.firstIndex(where: { $0.id == event.id }) {
             unscheduledTasks[index].completionStatus = status
+        } else if let index = flexibleEvents.firstIndex(where: { $0.id == event.id }) {
+            flexibleEvents[index].completionStatus = status
         }
     }
 }

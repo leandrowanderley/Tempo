@@ -55,6 +55,34 @@ enum HomeMockData {
         )
     ]
 
+    /// Eventos com data flexível (`isFlexible`): ficam em aberto por 7 dias a partir de `startDate`.
+    static let flexibleEvents: [Event] = [
+        Event(
+            id: "e9",
+            title: "Organizar o quarto",
+            notes: nil,
+            isAllDay: true,
+            startDate: Date().addingTimeInterval(-2 * 86400),
+            endDate: Date().addingTimeInterval(5 * 86400),
+            category: "Habitos",
+            isTask: false,
+            completionStatus: .notDone,
+            isFlexible: true
+        ),
+        Event(
+            id: "e10",
+            title: "Revisar anotações da semana",
+            notes: nil,
+            isAllDay: true,
+            startDate: Date().addingTimeInterval(-1 * 86400),
+            endDate: Date().addingTimeInterval(6 * 86400),
+            category: "Faculdade",
+            isTask: false,
+            completionStatus: .notDone,
+            isFlexible: true
+        )
+    ]
+
     static let unscheduledTasks: [Event] = [
         Event(
             id: "e7",

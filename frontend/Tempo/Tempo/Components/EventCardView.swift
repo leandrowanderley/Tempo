@@ -106,6 +106,12 @@ struct EventCardView: View {
             guard let dueDate = event.endDate else { return "" }
             return "Entrega \(dueDate.formatted(date: .abbreviated, time: .shortened))"
         }
+        if event.isFlexible {
+            guard let end = event.endDate else { return "" }
+            let style = Date.FormatStyle(date: .abbreviated, time: .omitted)
+                .locale(Locale(identifier: "pt_BR"))
+            return "Até \(end.formatted(style))"
+        }
         if event.isAllDay { return "Dia inteiro" }
         guard let start = event.startDate else { return "" }
         return start.formatted(date: .omitted, time: .shortened)
