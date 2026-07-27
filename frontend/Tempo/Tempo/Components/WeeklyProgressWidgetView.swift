@@ -20,7 +20,7 @@ struct WeeklyProgressWidgetView: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 15) {
                 HStack(spacing: 4) {
-                    Image(systemName: "balloon") // "bolt", "balloon", "flame.fill"
+                    Image(systemName: "balloon.fill") // "bolt", "balloon", "flame.fill"
                         .font(.largeTitle)
                         .foregroundColor(streakWeeks >= 1 ? .orange : Color(.systemGray3))
                     Text("\(streakWeeks)")
@@ -35,7 +35,7 @@ struct WeeklyProgressWidgetView: View {
                 //Spacer()
 
 //                HStack(spacing: 4) {
-//                    Image(systemName: "balloon") // "bolt", "balloon", "flame.fill"
+//                    Image(systemName: "balloon.fill") // "bolt", "balloon", "flame.fill"
 //                        .font(.largeTitle)
 //                        .foregroundColor(streakWeeks >= 1 ? .orange : Color(.systemGray3))
 //                    Text("\(streakWeeks)")

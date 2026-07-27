@@ -16,18 +16,43 @@ struct HomeView: View {
     // TODO: mockado — trocar pela sequência real assim que o back-end calcular streakWeeks (ver TODO.MD).
     private let streakWeeks = 5
 
+    @ObservedObject private var homePreferences = HomePreferencesStore.shared
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                WeeklyProgressWidgetView(
-                    routines: routines,
-                    streakWeeks: streakWeeks
-                )
+                if homePreferences.isEnabled(.dailyQuote) {
+                    DailyQuoteWidgetView()
+                }
 
-                sectionList(title: "O Que Temos Hoje", events: upcomingToday)
-                sectionList(title: "Atrasados", events: overdueEvents)
-                sectionList(title: "Eventos Flexíveis", events: activeFlexibleEvents)
-                sectionList(title: "Sem Data", events: unscheduledTasks)
+                if homePreferences.isEnabled(.weeklyProgress) {
+                    WeeklyProgressWidgetView(
+                        routines: routines,
+                        streakWeeks: streakWeeks
+                    )
+                }
+
+                if homePreferences.isEnabled(.quickStats) {
+                    QuickStatsWidgetView(
+                        todayCount: upcomingToday.count,
+                        overdueCount: overdueEvents.count,
+                        flexibleCount: activeFlexibleEvents.count,
+                        unscheduledCount: unscheduledTasks.count
+                    )
+                }
+
+                if homePreferences.isEnabled(.today) {
+                    sectionList(title: "O Que Temos Hoje", events: upcomingToday)
+                }
+                if homePreferences.isEnabled(.overdue) {
+                    sectionList(title: "Atrasados", events: overdueEvents)
+                }
+                if homePreferences.isEnabled(.flexible) {
+                    sectionList(title: "Eventos Flexíveis", events: activeFlexibleEvents)
+                }
+                if homePreferences.isEnabled(.unscheduled) {
+                    sectionList(title: "Sem Data", events: unscheduledTasks)
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, ScrollEdgeFadeOverlay.height)
