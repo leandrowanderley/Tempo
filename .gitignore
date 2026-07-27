@@ -1,14 +1,9 @@
 # ==========================================
 # specs para ia
 # ==========================================
-
-DESIGN_SYSTEM.md
-project.md
-TODO.MD
-BACKEND_SPECS.md
-BD_SPECS.md
-FRONTEND_SPECS.md
-API_GUIDE.md
+# Toda a pasta de specs/planos (todos os .md ficam juntos aqui) é local,
+# nunca deve ir pro GitHub.
+frontend/specs/
 
 # ==========================================
 # 🍎 macOS & Sistema Operacional
@@ -85,6 +80,9 @@ vendor/
 .env.*
 *.env
 
+# Segredos locais do app iOS (só o .example fica versionado)
+frontend/Tempo/Tempo/Utils/Secrets.swift
+
 # Logs do Gin ou do sistema
 *.log
 
@@ -96,3 +94,8 @@ vendor/
 *.swp
 *.swo
 *~
+
+# ==========================================
+# 🖼️ Screenshots soltas (referência local, não são asset de app)
+# ==========================================
+como_fica_quando_da_scroll.png

@@ -2,10 +2,9 @@
 //  FixedCommitment.swift
 //  Tempo
 //
-//  Compromissos fixos recorrentes do Routine Planner (project.md §3.4).
-//  Modelo espelha o formato de Event (mesmos tipos de campo — título, notas,
-//  categoria, horários), mas ainda não existe no back-end (Event não tem campo de
-//  recorrência — ver TODO.MD), então CRUD acontece só localmente (mock) por enquanto.
+//  Espelha models/fixed_commitment.go do back-end (01-soft-delete-rotinas-compromissos.md §3).
+//  CRUD ainda acontece só localmente (mock) — ver TODOs em FixedCommitmentFormView.swift pra
+//  reconectar no APIService quando o back-end estiver pronto.
 //
 
 import Foundation
@@ -15,9 +14,11 @@ struct FixedCommitment: Codable, Identifiable {
     var title: String
     var notes: String?
     var category: String
-    var weekdays: [Weekday]
+    var daysOfWeek: [Weekday]
     var startTime: Date
     var endTime: Date
+    var createdAt: Date = Date()
+    var deletedAt: Date?
 }
 
 extension FixedCommitment {
@@ -28,7 +29,7 @@ extension FixedCommitment {
     }()
 
     var scheduleLabel: String {
-        let daysLabel = Weekday.joinedLabel(weekdays)
+        let daysLabel = Weekday.joinedLabel(daysOfWeek)
         let timeLabel = "\(Self.timeFormatter.string(from: startTime)) - \(Self.timeFormatter.string(from: endTime))"
 
         return daysLabel.isEmpty ? timeLabel : "\(daysLabel), \(timeLabel)"

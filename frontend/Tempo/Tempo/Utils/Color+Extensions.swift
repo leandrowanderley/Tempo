@@ -30,7 +30,7 @@ extension Color {
         switch category {
         case "Faculdade": return .catStudy
         case "Trabalho": return .catWork
-        case "Treinos": return .catWorkout
+        case "Treinos": return .tempoStrava
         case "Habitos": return .catHabit
         case "Aniversário": return .catBirthday
         default: return CustomCategoryStore.shared.color(for: category) ?? .tempoTextSecondary

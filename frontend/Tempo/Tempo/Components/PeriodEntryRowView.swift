@@ -96,21 +96,21 @@ struct PeriodEntryRowView: View {
 #Preview {
     VStack(alignment: .leading, spacing: 8) {
         PeriodEntryRowView(
-            event: Event(id: "1", title: "Aniversário da Marina", notes: nil, isAllDay: true, startDate: Date(), endDate: Date(), category: "Aniversário", isTask: false, isDone: false),
+            event: Event(id: "1", title: "Aniversário da Marina", notes: nil, isAllDay: true, startDate: Date(), endDate: Date(), category: "Aniversário", isTask: false, completionStatus: .notDone),
             font: .subheadline,
             symbolSize: 14,
             onSelect: { _ in },
             onToggleDone: { _ in }
         )
         PeriodEntryRowView(
-            event: Event(id: "2", title: "Entrega do TCC - versão final revisada pelo orientador", notes: nil, isAllDay: false, startDate: nil, endDate: Date(), category: "Faculdade", isTask: true, isDone: false),
+            event: Event(id: "2", title: "Entrega do TCC - versão final revisada pelo orientador", notes: nil, isAllDay: false, startDate: nil, endDate: Date(), category: "Faculdade", isTask: true, completionStatus: .notDone),
             font: .subheadline,
             symbolSize: 14,
             onSelect: { _ in },
             onToggleDone: { _ in }
         )
         PeriodEntryRowView(
-            event: Event(id: "3", title: "Comprar passagem", notes: nil, isAllDay: false, startDate: nil, endDate: Date(), category: "Trabalho", isTask: true, isDone: true),
+            event: Event(id: "3", title: "Comprar passagem", notes: nil, isAllDay: false, startDate: nil, endDate: Date(), category: "Trabalho", isTask: true, completionStatus: .done),
             font: .subheadline,
             symbolSize: 14,
             onSelect: { _ in },

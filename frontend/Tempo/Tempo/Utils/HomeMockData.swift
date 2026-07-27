@@ -18,18 +18,7 @@ enum HomeMockData {
             endDate: Date().addingTimeInterval(-3600),
             category: "Faculdade",
             isTask: false,
-            isDone: false
-        ),
-        Event(
-            id: "e2",
-            title: "Treino de Corrida",
-            notes: "5km leve",
-            isAllDay: false,
-            startDate: Date().addingTimeInterval(-1800),
-            endDate: Date().addingTimeInterval(1800),
-            category: "Treinos",
-            isTask: false,
-            isDone: false
+            completionStatus: .notDone
         ),
         Event(
             id: "e3",
@@ -40,43 +29,57 @@ enum HomeMockData {
             endDate: Date().addingTimeInterval(9000),
             category: "Trabalho",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone
         ),
         Event(
-            id: "e4",
-            title: "Meditação",
+            id: "e11",
+            title: "Entrega do Trabalho de PAA",
+            notes: "Enviar PDF pelo portal",
+            isAllDay: false,
+            startDate: nil,
+            endDate: Date().addingTimeInterval(10800),
+            category: "Faculdade",
+            isTask: true,
+            completionStatus: .notDone
+        ),
+        Event(
+            id: "e12",
+            title: "Happy Hour da Firma",
             notes: nil,
             isAllDay: false,
-            startDate: Date().addingTimeInterval(12600),
-            endDate: Date().addingTimeInterval(13500),
-            category: "Habitos",
+            startDate: Date().addingTimeInterval(21600),
+            endDate: Date().addingTimeInterval(28800),
+            category: "Trabalho",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone
         )
     ]
 
-    static let tomorrow: [Event] = [
+    /// Eventos com data flexível (`isFlexible`): ficam em aberto por 7 dias a partir de `startDate`.
+    static let flexibleEvents: [Event] = [
         Event(
-            id: "e5",
-            title: "Aula de PAA",
+            id: "e9",
+            title: "Organizar o quarto",
             notes: nil,
-            isAllDay: false,
-            startDate: Date().addingTimeInterval(86400 + 32400),
-            endDate: Date().addingTimeInterval(86400 + 39600),
-            category: "Faculdade",
+            isAllDay: true,
+            startDate: Date().addingTimeInterval(-2 * 86400),
+            endDate: Date().addingTimeInterval(5 * 86400),
+            category: "Habitos",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone,
+            isFlexible: true
         ),
         Event(
-            id: "e6",
-            title: "Treino de Inferior",
+            id: "e13",
+            title: "Estudar para a prova de Cálculo",
             notes: nil,
-            isAllDay: false,
-            startDate: Date().addingTimeInterval(86400 + 61200),
-            endDate: Date().addingTimeInterval(86400 + 64800),
-            category: "Treinos",
+            isAllDay: true,
+            startDate: Date(),
+            endDate: Date().addingTimeInterval(7 * 86400),
+            category: "Faculdade",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone,
+            isFlexible: true
         )
     ]
 
@@ -90,18 +93,18 @@ enum HomeMockData {
             endDate: nil,
             category: "Faculdade",
             isTask: true,
-            isDone: false
+            completionStatus: .notDone
         ),
         Event(
-            id: "e8",
-            title: "Ligar para o dentista",
+            id: "e14",
+            title: "Renovar carteirinha da faculdade",
             notes: nil,
             isAllDay: false,
             startDate: nil,
             endDate: nil,
-            category: "Trabalho",
+            category: "Faculdade",
             isTask: true,
-            isDone: false
+            completionStatus: .notDone
         )
     ]
 }

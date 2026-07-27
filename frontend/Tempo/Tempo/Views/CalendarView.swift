@@ -6,17 +6,20 @@
 import SwiftUI
 
 struct CalendarView: View {
-    private enum ViewMode {
-        case month, period
+    private enum ViewMode: CaseIterable {
+        case month, period, history
 
         mutating func toggle() {
-            self = self == .month ? .period : .month
+            let all = Self.allCases
+            let currentIndex = all.firstIndex(of: self) ?? 0
+            self = all[(currentIndex + 1) % all.count]
         }
 
         var toggleSystemImage: String {
             switch self {
             case .month: return "rectangle.grid.3x2"
             case .period: return "rectangle.grid.1x3"
+            case .history: return "clock.arrow.circlepath"
             }
         }
     }
@@ -32,6 +35,8 @@ struct CalendarView: View {
                 CalendarMonthView(filters: filters)
             case .period:
                 CalendarPeriodView(filters: filters)
+            case .history:
+                HistoryCalendarView()
             }
         }
         .safeAreaInset(edge: .top, spacing: 0) {

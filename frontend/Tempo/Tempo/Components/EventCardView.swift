@@ -8,13 +8,18 @@ import SwiftUI
 struct EventCardView: View {
     let event: Event
     var onSave: (Event) -> Void = { _ in }
-    var onToggleDone: () -> Void = {}
+    var onStatusChange: (EventCompletionStatus) -> Void = { _ in }
+    var onDelete: (Event) -> Void = { _ in }
 
     @State private var isShowingDetail = false
 
+    private var showsCompletionToggle: Bool {
+        event.isTask || event.category == "Habitos"
+    }
+
     var body: some View {
         HStack(spacing: 12) {
-            if event.isTask {
+            if showsCompletionToggle {
                 doneToggleButton
             }
 
@@ -27,8 +32,8 @@ struct EventCardView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(event.title)
                             .font(.body)
-                            .foregroundColor(event.isDone ? .tempoTextSecondary : .tempoTextPrimary)
-                            .strikethrough(event.isDone)
+                            .foregroundColor(event.completionStatus == .notDone ? .tempoTextPrimary : .tempoTextSecondary)
+                            .strikethrough(event.completionStatus != .notDone)
 
                         if let notes = event.notes, !notes.isEmpty {
                             Text(notes)
@@ -55,30 +60,58 @@ struct EventCardView: View {
         .background(Color.tempoCard)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.tempoBorder, lineWidth: 1)
+                .stroke(
+                    event.isLate ? Color.tempoDestructive : Color.tempoBorder,
+                    lineWidth: event.isLate ? 1.5 : 1
+                )
         )
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .opacity(event.isDone ? 0.5 : 1)
+        .opacity(event.completionStatus == .notDone ? 1 : 0.5)
         .sheet(isPresented: $isShowingDetail) {
-            EventFormView(existingEvent: event, onSave: onSave)
+            EventFormView(existingEvent: event, onSave: onSave, onDelete: onDelete)
         }
     }
 
     private var doneToggleButton: some View {
-        Button {
-            onToggleDone()
+        Menu {
+            Button("Não Feito") { onStatusChange(.notDone) }
+            Button("Feito") { onStatusChange(.done) }
+            Button("Cancelado", role: .destructive) { onStatusChange(.cancelled) }
         } label: {
-            Image(systemName: event.isDone ? "checkmark.circle.fill" : "circle")
+            Image(systemName: statusIconName)
                 .font(.title3)
-                .foregroundColor(event.isDone ? .tempoTextPrimary : .tempoDisabled)
+                .foregroundColor(statusIconColor)
         }
-        .buttonStyle(.plain)
+        .menuStyle(.borderlessButton)
+        .fixedSize()
+    }
+
+    private var statusIconName: String {
+        switch event.completionStatus {
+        case .notDone: return "circle"
+        case .done: return "checkmark.circle.fill"
+        case .cancelled: return "xmark.circle.fill"
+        }
+    }
+
+    private var statusIconColor: Color {
+        switch event.completionStatus {
+        case .notDone: return .tempoDisabled
+        case .done: return .tempoTextPrimary
+        case .cancelled: return .tempoTextSecondary
+        }
     }
 
     private var timeLabel: String {
         if event.isTask {
             guard let dueDate = event.endDate else { return "" }
             return "Entrega \(dueDate.formatted(date: .abbreviated, time: .shortened))"
+        }
+        if event.isFlexible {
+            guard let end = event.endDate else { return "" }
+            let style = Date.FormatStyle(date: .abbreviated, time: .omitted)
+                .locale(Locale(identifier: "pt_BR"))
+            return "Até \(end.formatted(style))"
         }
         if event.isAllDay { return "Dia inteiro" }
         guard let start = event.startDate else { return "" }
@@ -87,13 +120,10 @@ struct EventCardView: View {
 
     @ViewBuilder
     private var statusTag: some View {
-        switch event.status {
-        case .late:
+        if event.completionStatus == .cancelled {
+            tag("Cancelado", color: .tempoTextSecondary)
+        } else if event.isLate {
             tag("Atrasado", color: .tempoDestructive)
-        case .ongoing:
-            tag("Fazendo", color: .catWorkout)
-        case .none:
-            EmptyView()
         }
     }
 
@@ -121,7 +151,7 @@ struct EventCardView: View {
             endDate: Date().addingTimeInterval(-3600),
             category: "Faculdade",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone
         ))
         EventCardView(event: Event(
             id: "2",
@@ -132,7 +162,7 @@ struct EventCardView: View {
             endDate: Date().addingTimeInterval(1800),
             category: "Treinos",
             isTask: false,
-            isDone: false
+            completionStatus: .notDone
         ))
     }
     .padding()

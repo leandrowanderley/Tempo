@@ -227,7 +227,7 @@ struct CalendarPeriodView: View {
 
     private func toggleDone(_ event: Event) {
         guard event.isTask else { return }
-        updateEvent(withID: event.id) { $0.isDone.toggle() }
+        updateEvent(withID: event.id) { $0.completionStatus = $0.completionStatus == .done ? .notDone : .done }
     }
 
     private func replaceEvent(_ event: Event) {

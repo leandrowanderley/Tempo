@@ -7,6 +7,12 @@
 
 import Foundation
 
+enum EventCompletionStatus: String, Codable {
+    case notDone
+    case done
+    case cancelled
+}
+
 struct Event: Codable, Identifiable {
     let id: String
     var title: String
@@ -16,28 +22,28 @@ struct Event: Codable, Identifiable {
     var endDate: Date?
     var category: String
     var isTask: Bool
-    var isDone: Bool
+    var completionStatus: EventCompletionStatus = .notDone
+    /// Só vale pra Evento (não Tarefa): dispensa data fixa e fica em aberto por
+    /// 7 dias a partir de `startDate` (ver EventFormView.save()).
+    var isFlexible: Bool = false
 }
 
 extension Event {
-    enum Status {
-        case none
-        case ongoing
-        case late
-    }
+    var isDone: Bool { completionStatus == .done }
 
-    var status: Status {
-        guard !isDone else { return .none }
-
+    /// Se o horário do evento/tarefa já passou, independente de `completionStatus`.
+    var hasEnded: Bool {
         if isTask {
-            guard let dueDate = endDate else { return .none }
-            return Date() > dueDate ? .late : .none
+            guard let dueDate = endDate else { return false }
+            return Date() > dueDate
         }
 
-        guard let start = startDate, let end = endDate else { return .none }
-        let now = Date()
-        if now > end { return .late }
-        if now >= start && now <= end { return .ongoing }
-        return .none
+        guard let end = endDate else { return false }
+        return Date() > end
+    }
+
+    /// Atrasado: ainda não feito/cancelado e o horário já passou.
+    var isLate: Bool {
+        completionStatus == .notDone && hasEnded
     }
 }

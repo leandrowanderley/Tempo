@@ -176,6 +176,8 @@ struct RoutineFormView: View {
         }
     }
 
+    // TODO: Voltar a chamar APIService.deleteRoutine(id:) quando o back-end estiver pronto, e
+    // só remover da lista local depois da chamada ter sucesso.
     private func deleteButton(action: @escaping () -> Void) -> some View {
         Button {
             action()
@@ -197,6 +199,9 @@ struct RoutineFormView: View {
         }
     }
 
+    // TODO: Voltar a chamar APIService.createRoutine/updateRoutine quando o back-end estiver
+    // pronto (endpoints ainda não existem — só DeleteRoutine foi adicionado em
+    // 01-soft-delete-rotinas-compromissos.md). Por enquanto, salva só localmente (mock).
     private func save() {
         let routine = Routine(
             id: existingRoutine?.id ?? UUID().uuidString,
@@ -205,7 +210,8 @@ struct RoutineFormView: View {
             type: type,
             targetCount: occurrences.count,
             currentCount: existingRoutine?.currentCount ?? 0,
-            occurrences: occurrences
+            occurrences: occurrences,
+            createdAt: existingRoutine?.createdAt ?? Date()
         )
 
         onSave(routine)
