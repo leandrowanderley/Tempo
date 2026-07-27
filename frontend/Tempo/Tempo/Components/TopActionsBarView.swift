@@ -12,6 +12,7 @@ struct TopActionsBarView: View {
 
     // TODO: Ligar onSearch quando a Central de Busca existir (project.md §3.6).
     var onSearch: () -> Void = {}
+    var onAddEvent: (Event) -> Void = { _ in }
 
     var body: some View {
         HStack(spacing: 18) {
@@ -34,7 +35,7 @@ struct TopActionsBarView: View {
             ProfileView()
         }
         .sheet(isPresented: $isShowingEventForm) {
-            EventFormView()
+            EventFormView(onSave: onAddEvent)
         }
     }
 

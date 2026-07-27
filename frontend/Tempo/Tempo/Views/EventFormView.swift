@@ -13,6 +13,7 @@ struct EventFormView: View {
 
     private let existingEvent: Event?
     private let onSave: (Event) -> Void
+    private let onDelete: ((Event) -> Void)?
 
     @State private var isTask: Bool
     @State private var title: String
@@ -25,6 +26,7 @@ struct EventFormView: View {
     @State private var hasDueDate: Bool
     @State private var dueDate: Date
     @State private var isShowingAddCategory = false
+    @State private var isShowingDeleteConfirmation = false
 
     @ObservedObject private var customCategoryStore = CustomCategoryStore.shared
 
@@ -37,9 +39,10 @@ struct EventFormView: View {
         return isTask ? all.filter { $0 != "Aniversário" } : all
     }
 
-    init(existingEvent: Event? = nil, onSave: @escaping (Event) -> Void = { _ in }) {
+    init(existingEvent: Event? = nil, onSave: @escaping (Event) -> Void = { _ in }, onDelete: ((Event) -> Void)? = nil) {
         self.existingEvent = existingEvent
         self.onSave = onSave
+        self.onDelete = onDelete
         _isTask = State(initialValue: existingEvent?.isTask ?? false)
         _title = State(initialValue: existingEvent?.title ?? "")
         _notes = State(initialValue: existingEvent?.notes ?? "")
@@ -79,6 +82,10 @@ struct EventFormView: View {
                     eventTimeFields
                         .transition(.opacity.combined(with: .move(edge: .top)))
                 }
+
+                if existingEvent != nil {
+                    deleteButton
+                }
             }
             .padding(20)
         }
@@ -92,6 +99,39 @@ struct EventFormView: View {
                 isFlexible = false
             }
         }
+        .confirmationDialog(
+            isTask ? "Excluir esta tarefa?" : "Excluir este evento?",
+            isPresented: $isShowingDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Excluir", role: .destructive) {
+                if let existingEvent {
+                    onDelete?(existingEvent)
+                }
+                dismiss()
+            }
+            Button("Cancelar", role: .cancel) {}
+        }
+    }
+
+    private var deleteButton: some View {
+        Button(role: .destructive) {
+            isShowingDeleteConfirmation = true
+        } label: {
+            HStack {
+                Spacer()
+                Text("Excluir")
+                    .font(.body.weight(.semibold))
+                Spacer()
+            }
+            .padding(.vertical, 12)
+        }
+        .foregroundColor(.tempoDestructive)
+        .background(Color.tempoCard)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12).stroke(Color.tempoDestructive, lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     private var header: some View {

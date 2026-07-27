@@ -8,6 +8,7 @@
 import Foundation
 
 enum RoutineMockData {
+    // organize meus treinos, coloque sendo sexta, sabado e somingo, com corrida no domingo de certeza, e sem treinos segunda, terca e quinta. quero treinar superior 2 vezes, e inferior 1 vez, alem de que quero colocar para correr mais uma vez semana, alem de domingo de manha
     static let workouts: [Routine] = [
         Routine(
             id: "r1",
@@ -16,9 +17,7 @@ enum RoutineMockData {
             targetCount: 3,
             currentCount: 2,
             occurrences: [
-                occurrence(.monday, 7, 8),
-                occurrence(.wednesday, 7, 8),
-                occurrence(.friday, 7, 8)
+                occurrence(.sunday, 6, 7)
             ]
         ),
         Routine(
@@ -27,7 +26,9 @@ enum RoutineMockData {
             type: .workout,
             targetCount: 1,
             currentCount: 1,
-            occurrences: [occurrence(.tuesday, 18, 19)]
+            occurrences: [
+                occurrence(.tuesday, 18, 19)
+            ]
         ),
         Routine(
             id: "r3",
@@ -42,10 +43,12 @@ enum RoutineMockData {
         )
     ]
 
+    
+    // Atualize esses habitos
     static let habits: [Routine] = [
         Routine(
             id: "h1",
-            title: "Meditação",
+            title: "Rezar",
             type: .habit,
             targetCount: 5,
             currentCount: 2,
@@ -72,6 +75,7 @@ enum RoutineMockData {
         )
     ]
 
+    // dados reais que coloquei para serem mock, inclusive preciso fazer 20 horas no meu trabalho que é na minha faculdade, coloque ai espacos para completar as horas
     static let fixedCommitments: [FixedCommitment] = [
         FixedCommitment(
             id: "f1",
@@ -79,16 +83,52 @@ enum RoutineMockData {
             notes: nil,
             category: "Faculdade",
             daysOfWeek: [.monday, .thursday],
-            startTime: time(9, 0),
-            endTime: time(11, 0)
+            startTime: time(11, 0),
+            endTime: time(13, 0)
         ),
         FixedCommitment(
             id: "f2",
-            title: "Edge Academy",
+            title: "Empreendedorismo",
             notes: nil,
-            category: "Trabalho",
+            category: "Faculdade", // Trabalho
+            daysOfWeek: [.tuesday, .thursday],
+            startTime: time(9, 20),
+            endTime: time(11, 0)
+        ),
+        FixedCommitment(
+            id: "f3",
+            title: "Blockchain",
+            notes: nil,
+            category: "Faculdade", // Trabalho
+            daysOfWeek: [.tuesday, .thursday],
+            startTime: time(15, 20),
+            endTime: time(17, 0)
+        ),
+        FixedCommitment(
+            id: "f4",
+            title: "Gerência de Projetos",
+            notes: nil,
+            category: "Faculdade", // Trabalho
+            daysOfWeek: [.tuesday, .thursday],
+            startTime: time(17, 10),
+            endTime: time(19, 0)
+        ),
+        FixedCommitment(
+            id: "f5",
+            title: "Inglês",
+            notes: nil,
+            category: "Faculdade", // Trabalho
             daysOfWeek: [.tuesday, .thursday],
             startTime: time(19, 0),
+            endTime: time(21, 40)
+        ),
+        FixedCommitment(
+            id: "f6",
+            title: "EV",
+            notes: nil,
+            category: "Faculdade", // Trabalho
+            daysOfWeek: [.wednesday],
+            startTime: time(19, 30),
             endTime: time(21, 0)
         )
     ]

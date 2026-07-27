@@ -9,6 +9,7 @@ struct EventCardView: View {
     let event: Event
     var onSave: (Event) -> Void = { _ in }
     var onStatusChange: (EventCompletionStatus) -> Void = { _ in }
+    var onDelete: (Event) -> Void = { _ in }
 
     @State private var isShowingDetail = false
 
@@ -67,7 +68,7 @@ struct EventCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .opacity(event.completionStatus == .notDone ? 1 : 0.5)
         .sheet(isPresented: $isShowingDetail) {
-            EventFormView(existingEvent: event, onSave: onSave)
+            EventFormView(existingEvent: event, onSave: onSave, onDelete: onDelete)
         }
     }
 

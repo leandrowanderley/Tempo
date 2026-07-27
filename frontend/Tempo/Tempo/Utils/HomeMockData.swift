@@ -21,17 +21,6 @@ enum HomeMockData {
             completionStatus: .notDone
         ),
         Event(
-            id: "e2",
-            title: "Treino de Corrida",
-            notes: "5km leve",
-            isAllDay: false,
-            startDate: Date().addingTimeInterval(-1800),
-            endDate: Date().addingTimeInterval(1800),
-            category: "Treinos",
-            isTask: false,
-            completionStatus: .notDone
-        ),
-        Event(
             id: "e3",
             title: "Reunião Edge Academy",
             notes: nil,
@@ -43,13 +32,24 @@ enum HomeMockData {
             completionStatus: .notDone
         ),
         Event(
-            id: "e4",
-            title: "Meditação",
+            id: "e11",
+            title: "Entrega do Trabalho de PAA",
+            notes: "Enviar PDF pelo portal",
+            isAllDay: false,
+            startDate: nil,
+            endDate: Date().addingTimeInterval(10800),
+            category: "Faculdade",
+            isTask: true,
+            completionStatus: .notDone
+        ),
+        Event(
+            id: "e12",
+            title: "Happy Hour da Firma",
             notes: nil,
             isAllDay: false,
-            startDate: Date().addingTimeInterval(12600),
-            endDate: Date().addingTimeInterval(13500),
-            category: "Habitos",
+            startDate: Date().addingTimeInterval(21600),
+            endDate: Date().addingTimeInterval(28800),
+            category: "Trabalho",
             isTask: false,
             completionStatus: .notDone
         )
@@ -70,12 +70,12 @@ enum HomeMockData {
             isFlexible: true
         ),
         Event(
-            id: "e10",
-            title: "Revisar anotações da semana",
+            id: "e13",
+            title: "Estudar para a prova de Cálculo",
             notes: nil,
             isAllDay: true,
-            startDate: Date().addingTimeInterval(-1 * 86400),
-            endDate: Date().addingTimeInterval(6 * 86400),
+            startDate: Date(),
+            endDate: Date().addingTimeInterval(7 * 86400),
             category: "Faculdade",
             isTask: false,
             completionStatus: .notDone,
@@ -96,13 +96,13 @@ enum HomeMockData {
             completionStatus: .notDone
         ),
         Event(
-            id: "e8",
-            title: "Ligar para o dentista",
+            id: "e14",
+            title: "Renovar carteirinha da faculdade",
             notes: nil,
             isAllDay: false,
             startDate: nil,
             endDate: nil,
-            category: "Trabalho",
+            category: "Faculdade",
             isTask: true,
             completionStatus: .notDone
         )

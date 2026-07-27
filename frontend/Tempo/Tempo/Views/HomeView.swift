@@ -59,7 +59,7 @@ struct HomeView: View {
 
             Spacer()
 
-            TopActionsBarView()
+            TopActionsBarView(onAddEvent: upsert)
         }
         .padding(20)
         .background(Color.tempoBackground)
@@ -88,11 +88,33 @@ struct HomeView: View {
 
                 VStack(spacing: 10) {
                     ForEach(events) { event in
-                        EventCardView(event: event, onStatusChange: { setStatus($0, for: event) })
+                        EventCardView(event: event, onSave: upsert, onStatusChange: { setStatus($0, for: event) }, onDelete: delete)
                     }
                 }
             }
         }
+    }
+
+    /// Cria ou edita: remove o evento (por id) de onde estiver e o reinsere na
+    /// lista correta, já que criar/editar pode mudar de categoria (ex.: virar flexível).
+    private func upsert(_ event: Event) {
+        today.removeAll { $0.id == event.id }
+        unscheduledTasks.removeAll { $0.id == event.id }
+        flexibleEvents.removeAll { $0.id == event.id }
+
+        if event.isFlexible {
+            flexibleEvents.append(event)
+        } else if event.isTask && event.endDate == nil {
+            unscheduledTasks.append(event)
+        } else {
+            today.append(event)
+        }
+    }
+
+    private func delete(_ event: Event) {
+        today.removeAll { $0.id == event.id }
+        unscheduledTasks.removeAll { $0.id == event.id }
+        flexibleEvents.removeAll { $0.id == event.id }
     }
 
     private func setStatus(_ status: EventCompletionStatus, for event: Event) {
