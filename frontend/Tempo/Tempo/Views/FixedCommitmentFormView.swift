@@ -19,9 +19,7 @@ struct FixedCommitmentFormView: View {
     @State private var title: String
     @State private var notes: String
     @State private var category: String
-    @State private var daysOfWeek: Set<Weekday>
-    @State private var startTime: Date
-    @State private var endTime: Date
+    @State private var occurrences: [RoutineOccurrence]
     @State private var isShowingAddCategory = false
 
     @ObservedObject private var customCategoryStore = CustomCategoryStore.shared
@@ -43,13 +41,11 @@ struct FixedCommitmentFormView: View {
         _title = State(initialValue: existingCommitment?.title ?? "")
         _notes = State(initialValue: existingCommitment?.notes ?? "")
         _category = State(initialValue: existingCommitment?.category ?? categories[0])
-        _daysOfWeek = State(initialValue: Set(existingCommitment?.daysOfWeek ?? []))
-        _startTime = State(initialValue: existingCommitment?.startTime ?? Date())
-        _endTime = State(initialValue: existingCommitment?.endTime ?? Date().addingTimeInterval(3600))
+        _occurrences = State(initialValue: existingCommitment?.occurrences ?? [])
     }
 
     private var isFormValid: Bool {
-        !title.trimmingCharacters(in: .whitespaces).isEmpty && !daysOfWeek.isEmpty
+        !title.trimmingCharacters(in: .whitespaces).isEmpty && !occurrences.isEmpty
     }
 
     var body: some View {
@@ -60,13 +56,7 @@ struct FixedCommitmentFormView: View {
                 TempoTextField(title: "Título", text: $title)
                 notesField
                 categoryPicker
-                weekdayPicker
-
-                DatePicker("Começa", selection: $startTime, displayedComponents: [.hourAndMinute])
-                    .foregroundColor(.tempoTextPrimary)
-
-                DatePicker("Termina", selection: $endTime, displayedComponents: [.hourAndMinute])
-                    .foregroundColor(.tempoTextPrimary)
+                WeekdayScheduleEditorView(occurrences: $occurrences)
 
                 if let onDelete {
                     deleteButton(action: onDelete)
@@ -173,42 +163,6 @@ struct FixedCommitmentFormView: View {
         }
     }
 
-    private var weekdayPicker: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Dias da Semana")
-                .font(.subheadline)
-                .foregroundColor(.tempoTextSecondary)
-
-            HStack(spacing: 8) {
-                ForEach(Weekday.allCases) { day in
-                    weekdayChip(day)
-                }
-            }
-        }
-    }
-
-    private func weekdayChip(_ day: Weekday) -> some View {
-        let isSelected = daysOfWeek.contains(day)
-
-        return Button {
-            if isSelected {
-                daysOfWeek.remove(day)
-            } else {
-                daysOfWeek.insert(day)
-            }
-        } label: {
-            Text(day.shortLabel.prefix(1))
-                .font(.footnote.weight(.semibold))
-                .foregroundColor(isSelected ? .white : .tempoTextPrimary)
-                .frame(width: 32, height: 32)
-                .background(isSelected ? Color.tempoPrimary : Color.tempoCard)
-                .clipShape(Circle())
-                .overlay(
-                    Circle().stroke(isSelected ? Color.tempoPrimary : Color.tempoBorder, lineWidth: 1)
-                )
-        }
-    }
-
     // TODO: Voltar a chamar APIService.deleteFixedCommitment(id:) quando o back-end estiver
     // pronto, e só remover da lista local depois da chamada ter sucesso.
     private func deleteButton(action: @escaping () -> Void) -> some View {
@@ -240,9 +194,7 @@ struct FixedCommitmentFormView: View {
             title: title.trimmingCharacters(in: .whitespaces),
             notes: notes.isEmpty ? nil : notes,
             category: category,
-            daysOfWeek: daysOfWeek.sorted { $0.rawValue < $1.rawValue },
-            startTime: startTime,
-            endTime: endTime,
+            occurrences: occurrences,
             createdAt: existingCommitment?.createdAt ?? Date()
         )
 

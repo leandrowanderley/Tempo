@@ -133,13 +133,14 @@ enum DataMock {
     private static func fixedCommitmentEvents(for dates: [Date], calendar: Calendar) -> [Event] {
         dates.flatMap { date -> [Event] in
             RoutineMockData.fixedCommitments.flatMap { commitment -> [Event] in
-                commitment.daysOfWeek.compactMap { weekday -> Event? in
-                    guard calendar.component(.weekday, from: date) == weekday.rawValue,
-                          let start = combine(date: date, time: commitment.startTime, calendar: calendar),
-                          let end = combine(date: date, time: commitment.endTime, calendar: calendar) else { return nil }
+                commitment.occurrences.compactMap { occurrence -> Event? in
+                    guard let weekday = occurrence.weekday,
+                          calendar.component(.weekday, from: date) == weekday.rawValue,
+                          let start = combine(date: date, time: occurrence.startTime, calendar: calendar),
+                          let end = combine(date: date, time: occurrence.endTime, calendar: calendar) else { return nil }
 
                     return Event(
-                        id: "fixed-\(commitment.id)-\(Int(calendar.startOfDay(for: date).timeIntervalSince1970))",
+                        id: "fixed-\(occurrence.id)-\(Int(calendar.startOfDay(for: date).timeIntervalSince1970))",
                         title: commitment.title,
                         notes: commitment.notes,
                         isAllDay: false,

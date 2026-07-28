@@ -14,9 +14,7 @@ struct FixedCommitment: Codable, Identifiable {
     var title: String
     var notes: String?
     var category: String
-    var daysOfWeek: [Weekday]
-    var startTime: Date
-    var endTime: Date
+    var occurrences: [RoutineOccurrence]
     var createdAt: Date = Date()
     var deletedAt: Date?
 }
@@ -28,10 +26,34 @@ extension FixedCommitment {
         return formatter
     }()
 
-    var scheduleLabel: String {
-        let daysLabel = Weekday.joinedLabel(daysOfWeek)
-        let timeLabel = "\(Self.timeFormatter.string(from: startTime)) - \(Self.timeFormatter.string(from: endTime))"
+    private static func timeRangeLabel(start: Date, end: Date) -> String {
+        "\(timeFormatter.string(from: start)) - \(timeFormatter.string(from: end))"
+    }
 
-        return daysLabel.isEmpty ? timeLabel : "\(daysLabel), \(timeLabel)"
+    var scheduleLabel: String {
+        let sortedOccurrences = occurrences.sorted { first, second -> Bool in
+            let firstRank = first.weekday?.rawValue ?? 0
+            let secondRank = second.weekday?.rawValue ?? 0
+            return firstRank < secondRank
+        }
+        guard let first = sortedOccurrences.first else { return "" }
+
+        let hasUniformTime = sortedOccurrences.allSatisfy { occurrence -> Bool in
+            occurrence.startTime == first.startTime && occurrence.endTime == first.endTime
+        }
+
+        if hasUniformTime {
+            let daysLabel = Weekday.joinedLabel(sortedOccurrences.compactMap(\.weekday))
+            let timeLabel = Self.timeRangeLabel(start: first.startTime, end: first.endTime)
+            return daysLabel.isEmpty ? timeLabel : "\(daysLabel), \(timeLabel)"
+        }
+
+        return sortedOccurrences
+            .map { occurrence in
+                let dayLabel = occurrence.weekday?.shortLabel ?? ""
+                let timeLabel = Self.timeRangeLabel(start: occurrence.startTime, end: occurrence.endTime)
+                return "\(dayLabel) \(timeLabel)"
+            }
+            .joined(separator: ", ")
     }
 }
