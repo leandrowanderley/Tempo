@@ -82,54 +82,59 @@ enum RoutineMockData {
             title: "Aula de PAA",
             notes: nil,
             category: "Faculdade",
-            daysOfWeek: [.monday, .thursday],
-            startTime: time(11, 0),
-            endTime: time(13, 0)
+            occurrences: [
+                preciseOccurrence(.monday, 11, 0, 13, 0),
+                preciseOccurrence(.thursday, 11, 0, 13, 0)
+            ]
         ),
         FixedCommitment(
             id: "f2",
             title: "Empreendedorismo",
             notes: nil,
             category: "Faculdade", // Trabalho
-            daysOfWeek: [.tuesday, .thursday],
-            startTime: time(9, 20),
-            endTime: time(11, 0)
+            occurrences: [
+                preciseOccurrence(.tuesday, 9, 20, 11, 0),
+                preciseOccurrence(.thursday, 9, 20, 11, 0)
+            ]
         ),
         FixedCommitment(
             id: "f3",
             title: "Blockchain",
             notes: nil,
             category: "Faculdade", // Trabalho
-            daysOfWeek: [.tuesday, .thursday],
-            startTime: time(15, 20),
-            endTime: time(17, 0)
+            occurrences: [
+                preciseOccurrence(.tuesday, 15, 20, 17, 0),
+                preciseOccurrence(.thursday, 15, 20, 17, 0)
+            ]
         ),
         FixedCommitment(
             id: "f4",
             title: "Gerência de Projetos",
             notes: nil,
             category: "Faculdade", // Trabalho
-            daysOfWeek: [.tuesday, .thursday],
-            startTime: time(17, 10),
-            endTime: time(19, 0)
+            occurrences: [
+                preciseOccurrence(.tuesday, 17, 10, 19, 0),
+                preciseOccurrence(.thursday, 17, 10, 19, 0)
+            ]
         ),
         FixedCommitment(
             id: "f5",
             title: "Inglês",
             notes: nil,
             category: "Faculdade", // Trabalho
-            daysOfWeek: [.tuesday, .thursday],
-            startTime: time(19, 0),
-            endTime: time(21, 40)
+            occurrences: [
+                preciseOccurrence(.tuesday, 19, 0, 21, 40),
+                preciseOccurrence(.thursday, 19, 0, 21, 40)
+            ]
         ),
         FixedCommitment(
             id: "f6",
             title: "EV",
             notes: nil,
             category: "Faculdade", // Trabalho
-            daysOfWeek: [.wednesday],
-            startTime: time(19, 30),
-            endTime: time(21, 0)
+            occurrences: [
+                preciseOccurrence(.wednesday, 19, 30, 21, 0)
+            ]
         )
     ]
 
@@ -167,5 +172,13 @@ enum RoutineMockData {
 
     private static func occurrence(_ weekday: Weekday, _ startHour: Int, _ endHour: Int) -> RoutineOccurrence {
         RoutineOccurrence(id: UUID().uuidString, weekday: weekday, startTime: time(startHour, 0), endTime: time(endHour, 0))
+    }
+
+    private static func preciseOccurrence(
+        _ weekday: Weekday,
+        _ startHour: Int, _ startMinute: Int,
+        _ endHour: Int, _ endMinute: Int
+    ) -> RoutineOccurrence {
+        RoutineOccurrence(id: UUID().uuidString, weekday: weekday, startTime: time(startHour, startMinute), endTime: time(endHour, endMinute))
     }
 }

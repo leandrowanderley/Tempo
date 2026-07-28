@@ -33,16 +33,16 @@ struct ProfileView: View {
                 avatarSection
                 personalInfoCard
                 saveProfileButton
-                resetPasswordButton
-
-                if let passwordResetMessage {
-                    Text(passwordResetMessage)
-                        .font(.footnote)
-                        .foregroundColor(.tempoTextSecondary)
-                }
-
-                integrationsSection
-                signOutButton
+                // resetPasswordButton
+                //
+                // if let passwordResetMessage {
+                //     Text(passwordResetMessage)
+                //         .font(.footnote)
+                //         .foregroundColor(.tempoTextSecondary)
+                // }
+                //
+                // integrationsSection
+                // signOutButton
             }
             .padding(20)
         }
@@ -143,11 +143,11 @@ struct ProfileView: View {
                     .labelsHidden()
             }
 
-            labeledField("E-mail") {
-                Text(authViewModel.currentUserEmail)
-                    .font(.body)
-                    .foregroundColor(.tempoTextPrimary)
-            }
+            // labeledField("E-mail") {
+            //     Text(authViewModel.currentUserEmail)
+            //         .font(.body)
+            //         .foregroundColor(.tempoTextPrimary)
+            // }
         }
         .padding()
         .background(Color.tempoCard)
@@ -204,6 +204,7 @@ struct ProfileView: View {
         .disabled(authViewModel.isLoading)
     }
 
+    /*
     private var resetPasswordButton: some View {
         Button {
             Task {
@@ -279,6 +280,7 @@ struct ProfileView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
     }
+    */
 }
 
 #Preview {

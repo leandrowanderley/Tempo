@@ -11,16 +11,13 @@ struct ContentView: View {
     @EnvironmentObject private var authViewModel: AuthViewModel
 
     var body: some View {
-        Group {
-            if authViewModel.isAuthenticated {
-                MainTabView()
-            } else {
-                AuthContainerView()
+        // Gate de login (Supabase) desligado temporariamente pra dev local sem backend —
+        // reverter pra `if authViewModel.isAuthenticated { MainTabView() } else { AuthContainerView() }`
+        // quando a autenticação voltar a ser usada.
+        MainTabView()
+            .task {
+                await authViewModel.restoreSession()
             }
-        }
-        .task {
-            await authViewModel.restoreSession()
-        }
     }
 }
 

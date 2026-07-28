@@ -9,13 +9,21 @@ import Supabase
 
 @MainActor
 final class AuthViewModel: ObservableObject {
-    @Published var isAuthenticated = false
-    @Published var currentUserName = ""
+    // Usuário mock enquanto o login (Supabase) está desligado (ver ContentView) — dá pra
+    // navegar o app inteiro (Home, Perfil, etc.) sem precisar de backend/sessão real.
+    // Só nome, data de nascimento e ícone são usados por enquanto (e-mail, redefinir
+    // senha, integrações e logout estão comentados no ProfileView). `restoreSession`/
+    // `login`/`signUp` sobrescrevem esses valores normalmente quando a autenticação
+    // voltar a ser usada.
+    @Published var isAuthenticated = true
+    @Published var currentUserName = "Leandro"
     @Published var currentUserEmail = ""
-    @Published var currentUserIcon: String?
-    @Published var currentUserBirthDate: Date?
+    @Published var currentUserIcon: String? = "icon_1"
+    @Published var currentUserBirthDate: Date? = AuthViewModel.mockBirthDate
     @Published var isLoading = false
     @Published var errorMessage: String?
+
+    private static let mockBirthDate = Calendar(identifier: .gregorian).date(from: DateComponents(year: 2000, month: 1, day: 1))
 
     private let auth = SupabaseService.client.auth
 
@@ -108,32 +116,12 @@ final class AuthViewModel: ObservableObject {
         }
     }
 
-    /// user_metadata é substituído por inteiro na API do Supabase a cada update, então todo
-    /// update reenvia os três campos juntos pra não perder os que não mudaram.
-    private func metadata(name: String, icon: String?, birthDate: Date?) -> [String: AnyJSON] {
-        var data: [String: AnyJSON] = ["name": .string(name)]
-        if let icon {
-            data["icon"] = .string(icon)
-        }
-        if let birthDate {
-            data["birthDate"] = .string(Self.birthDateFormatter.string(from: birthDate))
-        }
-        return data
-    }
-
     /// Troca o ícone de perfil (guardado como string, o nome do asset — ver ProfileIconCatalog).
+    /// Grava só localmente no usuário mock por enquanto — sem sessão Supabase real, a chamada
+    /// pro backend falharia com "sessionMissing" (ver AuthViewModel topo do arquivo).
     func updateIcon(_ icon: String) async {
         errorMessage = nil
-
-        do {
-            let updatedUser = try await auth.update(
-                user: UserAttributes(data: metadata(name: currentUserName, icon: icon, birthDate: currentUserBirthDate))
-            )
-            currentUserIcon = updatedUser.userMetadata["icon"]?.stringValue ?? icon
-        } catch {
-            print("⚠️ Supabase update (icon) falhou:", error)
-            errorMessage = (error as? AuthError)?.message ?? "Não foi possível atualizar o ícone."
-        }
+        currentUserIcon = icon
     }
 
     func updateProfile(name: String, birthDate: Date?) async {
@@ -143,20 +131,9 @@ final class AuthViewModel: ObservableObject {
             return
         }
 
-        isLoading = true
         errorMessage = nil
-        defer { isLoading = false }
-
-        do {
-            let updatedUser = try await auth.update(
-                user: UserAttributes(data: metadata(name: trimmedName, icon: currentUserIcon, birthDate: birthDate))
-            )
-            currentUserName = updatedUser.userMetadata["name"]?.stringValue ?? trimmedName
-            currentUserBirthDate = (updatedUser.userMetadata["birthDate"]?.stringValue).flatMap { Self.birthDateFormatter.date(from: $0) }
-        } catch {
-            print("⚠️ Supabase update (profile) falhou:", error)
-            errorMessage = (error as? AuthError)?.message ?? "Não foi possível atualizar o perfil."
-        }
+        currentUserName = trimmedName
+        currentUserBirthDate = birthDate
     }
 
     func sendPasswordReset() async {
