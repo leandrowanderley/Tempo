@@ -10,15 +10,14 @@ struct TopActionsBarView: View {
     @State private var isShowingProfile = false
     @State private var isShowingEventForm = false
     @State private var isShowingHomeCustomization = false
+    @State private var isShowingSearch = false
 
-    // TODO: Ligar onSearch quando a Central de Busca existir (project.md §3.6).
-    var onSearch: () -> Void = {}
     var onAddEvent: (Event) -> Void = { _ in }
 
     var body: some View {
         HStack(spacing: 18) {
             actionButton(systemName: "plus") { isShowingEventForm = true }
-            actionButton(systemName: "magnifyingglass", action: onSearch)
+            actionButton(systemName: "magnifyingglass") { isShowingSearch = true }
             actionButton(systemName: "slider.horizontal.3") { isShowingHomeCustomization = true }
             Button {
                 isShowingProfile = true
@@ -41,6 +40,9 @@ struct TopActionsBarView: View {
         }
         .sheet(isPresented: $isShowingHomeCustomization) {
             HomeCustomizationSheetView()
+        }
+        .sheet(isPresented: $isShowingSearch) {
+            SearchSheetView()
         }
     }
 

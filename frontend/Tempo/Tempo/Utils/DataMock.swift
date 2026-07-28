@@ -108,9 +108,12 @@ enum DataMock {
 
         return dates.flatMap { date -> [Event] in
             routines.flatMap { routine -> [Event] in
-                routine.occurrences.compactMap { occurrence -> Event? in
+                guard isOwnerActive(createdAt: routine.createdAt, deletedAt: routine.deletedAt, on: date, calendar: calendar) else { return [] }
+
+                return routine.occurrences.compactMap { occurrence -> Event? in
                     guard let weekday = occurrence.weekday,
                           calendar.component(.weekday, from: date) == weekday.rawValue,
+                          isOccurrenceActive(occurrence, on: date, calendar: calendar),
                           let start = combine(date: date, time: occurrence.startTime, calendar: calendar),
                           let end = combine(date: date, time: occurrence.endTime, calendar: calendar) else { return nil }
 
@@ -133,9 +136,12 @@ enum DataMock {
     private static func fixedCommitmentEvents(for dates: [Date], calendar: Calendar) -> [Event] {
         dates.flatMap { date -> [Event] in
             RoutineMockData.fixedCommitments.flatMap { commitment -> [Event] in
-                commitment.occurrences.compactMap { occurrence -> Event? in
+                guard isOwnerActive(createdAt: commitment.createdAt, deletedAt: commitment.deletedAt, on: date, calendar: calendar) else { return [] }
+
+                return commitment.occurrences.compactMap { occurrence -> Event? in
                     guard let weekday = occurrence.weekday,
                           calendar.component(.weekday, from: date) == weekday.rawValue,
+                          isOccurrenceActive(occurrence, on: date, calendar: calendar),
                           let start = combine(date: date, time: occurrence.startTime, calendar: calendar),
                           let end = combine(date: date, time: occurrence.endTime, calendar: calendar) else { return nil }
 
@@ -153,6 +159,23 @@ enum DataMock {
                 }
             }
         }
+    }
+
+    /// Uma ocorrência só projeta evento em `date` se ela já estava em vigor (`effectiveFrom`)
+    /// e ainda não tinha sido substituída/removida (`effectiveTo`) naquele dia.
+    private static func isOccurrenceActive(_ occurrence: RoutineOccurrence, on date: Date, calendar: Calendar) -> Bool {
+        guard calendar.startOfDay(for: occurrence.effectiveFrom) <= date else { return false }
+        guard let effectiveTo = occurrence.effectiveTo else { return true }
+        return date < calendar.startOfDay(for: effectiveTo)
+    }
+
+    /// Fecha o gap de `routine.createdAt`/`deletedAt` (ou `fixedCommitment` equivalente) não
+    /// sendo checado na projeção — uma rotina criada hoje não pode "vazar" pro passado, e uma
+    /// deletada não pode continuar aparecendo no calendário normal depois da exclusão.
+    private static func isOwnerActive(createdAt: Date, deletedAt: Date?, on date: Date, calendar: Calendar) -> Bool {
+        guard calendar.startOfDay(for: createdAt) <= date else { return false }
+        guard let deletedAt else { return true }
+        return date < calendar.startOfDay(for: deletedAt)
     }
 
     private struct FixedSample {

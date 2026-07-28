@@ -26,6 +26,9 @@ struct Event: Codable, Identifiable {
     /// Só vale pra Evento (não Tarefa): dispensa data fixa e fica em aberto por
     /// 7 dias a partir de `startDate` (ver EventFormView.save()).
     var isFlexible: Bool = false
+    /// Soft delete (versionamento-ocorrencias-e-soft-delete-eventos.md): some das listagens
+    /// normais, mas a Central de Busca continua mostrando o item, marcado como excluído.
+    var deletedAt: Date?
 }
 
 extension Event {

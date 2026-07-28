@@ -7,6 +7,11 @@ import SwiftUI
 
 struct EventCardView: View {
     let event: Event
+    /// Mostra a data junto do horário — necessário na Central de Busca, que mistura
+    /// ocorrências de semanas diferentes (sem isso, rotinas recorrentes viram várias
+    /// linhas com o mesmo texto, parecendo duplicadas). Nas telas por dia (Home,
+    /// Calendário) a data já está implícita pelo contexto, então fica desligado.
+    var showsDate: Bool = false
     var onSave: (Event) -> Void = { _ in }
     var onStatusChange: (EventCompletionStatus) -> Void = { _ in }
     var onDelete: (Event) -> Void = { _ in }
@@ -102,6 +107,11 @@ struct EventCardView: View {
         }
     }
 
+    private static let dateOnlyStyle = Date.FormatStyle(date: .abbreviated, time: .omitted)
+        .locale(Locale(identifier: "pt_BR"))
+    private static let dateTimeStyle = Date.FormatStyle(date: .abbreviated, time: .shortened)
+        .locale(Locale(identifier: "pt_BR"))
+
     private var timeLabel: String {
         if event.isTask {
             guard let dueDate = event.endDate else { return "" }
@@ -109,18 +119,24 @@ struct EventCardView: View {
         }
         if event.isFlexible {
             guard let end = event.endDate else { return "" }
-            let style = Date.FormatStyle(date: .abbreviated, time: .omitted)
-                .locale(Locale(identifier: "pt_BR"))
-            return "Até \(end.formatted(style))"
+            return "Até \(end.formatted(Self.dateOnlyStyle))"
         }
-        if event.isAllDay { return "Dia inteiro" }
+        if event.isAllDay {
+            guard showsDate, let start = event.startDate else { return "Dia inteiro" }
+            return start.formatted(Self.dateOnlyStyle)
+        }
         guard let start = event.startDate else { return "" }
+        if showsDate {
+            return start.formatted(Self.dateTimeStyle)
+        }
         return start.formatted(date: .omitted, time: .shortened)
     }
 
     @ViewBuilder
     private var statusTag: some View {
-        if event.completionStatus == .cancelled {
+        if event.deletedAt != nil {
+            tag("excluído", color: .tempoTextSecondary)
+        } else if event.completionStatus == .cancelled {
             tag("Cancelado", color: .tempoTextSecondary)
         } else if event.isLate {
             tag("Atrasado", color: .tempoDestructive)

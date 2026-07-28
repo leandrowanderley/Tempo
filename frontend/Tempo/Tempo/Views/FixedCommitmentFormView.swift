@@ -41,7 +41,7 @@ struct FixedCommitmentFormView: View {
         _title = State(initialValue: existingCommitment?.title ?? "")
         _notes = State(initialValue: existingCommitment?.notes ?? "")
         _category = State(initialValue: existingCommitment?.category ?? categories[0])
-        _occurrences = State(initialValue: existingCommitment?.occurrences ?? [])
+        _occurrences = State(initialValue: existingCommitment?.occurrences.filter { $0.effectiveTo == nil } ?? [])
     }
 
     private var isFormValid: Bool {
@@ -189,12 +189,17 @@ struct FixedCommitmentFormView: View {
     // TODO: Voltar a chamar APIService.createFixedCommitment/updateFixedCommitment quando o
     // back-end estiver pronto. Por enquanto, salva só localmente (mock) e devolve pro chamador via onSave.
     private func save() {
+        let versionedOccurrences = RoutineOccurrence.diffed(
+            current: existingCommitment?.occurrences ?? [],
+            desired: occurrences
+        )
+
         let commitment = FixedCommitment(
             id: existingCommitment?.id ?? UUID().uuidString,
             title: title.trimmingCharacters(in: .whitespaces),
             notes: notes.isEmpty ? nil : notes,
             category: category,
-            occurrences: occurrences,
+            occurrences: versionedOccurrences,
             createdAt: existingCommitment?.createdAt ?? Date()
         )
 

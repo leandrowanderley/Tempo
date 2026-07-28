@@ -35,7 +35,7 @@ struct RoutineFormView: View {
         self.onDelete = onDelete
         _title = State(initialValue: existingRoutine?.title ?? "")
         _notes = State(initialValue: existingRoutine?.notes ?? "")
-        _occurrences = State(initialValue: existingRoutine?.occurrences ?? [])
+        _occurrences = State(initialValue: existingRoutine?.occurrences.filter { $0.effectiveTo == nil } ?? [])
     }
 
     private var isFormValid: Bool {
@@ -123,6 +123,11 @@ struct RoutineFormView: View {
     // pronto (endpoints ainda não existem — só DeleteRoutine foi adicionado em
     // 01-soft-delete-rotinas-compromissos.md). Por enquanto, salva só localmente (mock).
     private func save() {
+        let versionedOccurrences = RoutineOccurrence.diffed(
+            current: existingRoutine?.occurrences ?? [],
+            desired: occurrences
+        )
+
         let routine = Routine(
             id: existingRoutine?.id ?? UUID().uuidString,
             title: title.trimmingCharacters(in: .whitespaces),
@@ -130,7 +135,7 @@ struct RoutineFormView: View {
             type: type,
             targetCount: occurrences.count,
             currentCount: existingRoutine?.currentCount ?? 0,
-            occurrences: occurrences,
+            occurrences: versionedOccurrences,
             createdAt: existingRoutine?.createdAt ?? Date()
         )
 
